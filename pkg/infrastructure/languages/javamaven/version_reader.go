@@ -1,7 +1,8 @@
-package java_maven
+package javamaven
 
 import (
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"path/filepath"
 
@@ -29,11 +30,11 @@ func (r *VersionReader) ReadVersion(repoPath string) (entities.Version, error) {
 		return entities.Version{}, fmt.Errorf("reading pom.xml: %w", err)
 	}
 	var proj pomProject
-	if err := xml.Unmarshal([]byte(content), &proj); err != nil {
+	if err = xml.Unmarshal([]byte(content), &proj); err != nil {
 		return entities.Version{}, fmt.Errorf("parsing pom.xml: %w", err)
 	}
 	if proj.Version == "" {
-		return entities.Version{}, fmt.Errorf("no version element found in pom.xml")
+		return entities.Version{}, errors.New("no version element found in pom.xml")
 	}
 	return entities.NewVersion(proj.Version)
 }

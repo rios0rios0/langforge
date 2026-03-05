@@ -2,6 +2,7 @@ package python
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"path/filepath"
 	"strings"
@@ -23,7 +24,7 @@ func (r *DependencyReader) ReadDependencies(repoPath string) ([]entities.Depende
 	if fileutil.Exists(pyprojectPath) {
 		return readPyprojectDeps(pyprojectPath)
 	}
-	return nil, fmt.Errorf("no requirements.txt or pyproject.toml found")
+	return nil, errors.New("no requirements.txt or pyproject.toml found")
 }
 
 func readRequirementsTxt(path string) ([]entities.Dependency, error) {
@@ -40,9 +41,9 @@ func readRequirementsTxt(path string) ([]entities.Dependency, error) {
 		}
 		matched := false
 		for _, sep := range []string{"==", ">=", "<=", "!=", "~=", ">"} {
-			if idx := strings.Index(line, sep); idx != -1 {
-				name := strings.TrimSpace(line[:idx])
-				ver := strings.TrimSpace(line[idx+len(sep):])
+			if before, after, ok := strings.Cut(line, sep); ok {
+				name := strings.TrimSpace(before)
+				ver := strings.TrimSpace(after)
 				deps = append(deps, entities.NewDependency(name, sep+ver, "", "requirements.txt"))
 				matched = true
 				break

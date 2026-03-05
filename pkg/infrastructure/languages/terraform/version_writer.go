@@ -1,6 +1,7 @@
 package terraform
 
 import (
+	"errors"
 	"fmt"
 	"path/filepath"
 	"regexp"
@@ -35,7 +36,7 @@ func (w *VersionWriter) WriteVersion(repoPath string, version entities.Version) 
 		return fmt.Sprintf(`required_version = ">= %s"`, version.String())
 	})
 	if !updated {
-		return fmt.Errorf("no required_version found in versions.tf")
+		return errors.New("no required_version found in versions.tf")
 	}
 	return fileutil.WriteFile(path, newContent)
 }

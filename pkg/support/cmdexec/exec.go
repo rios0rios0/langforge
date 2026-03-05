@@ -1,7 +1,8 @@
-package exec
+package cmdexec
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"os/exec"
 )
@@ -22,7 +23,7 @@ func NewDefaultRunner() *DefaultRunner {
 
 // Run executes the command with the given args in the specified directory.
 func (r *DefaultRunner) Run(dir string, name string, args ...string) error {
-	cmd := exec.Command(name, args...) // #nosec G204
+	cmd := exec.CommandContext(context.Background(), name, args...) // #nosec G204
 	cmd.Dir = dir
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr

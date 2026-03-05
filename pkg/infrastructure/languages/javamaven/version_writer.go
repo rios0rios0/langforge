@@ -1,6 +1,7 @@
-package java_maven
+package javamaven
 
 import (
+	"errors"
 	"fmt"
 	"path/filepath"
 	"regexp"
@@ -35,7 +36,7 @@ func (w *VersionWriter) WriteVersion(repoPath string, version entities.Version) 
 		return fmt.Sprintf("<version>%s</version>", version.String())
 	})
 	if !updated {
-		return fmt.Errorf("no <version> element found in pom.xml")
+		return errors.New("no <version> element found in pom.xml")
 	}
 	return fileutil.WriteFile(path, newContent)
 }

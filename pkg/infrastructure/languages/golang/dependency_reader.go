@@ -10,6 +10,8 @@ import (
 	"github.com/rios0rios0/langforge/pkg/support/fileutil"
 )
 
+const minRequireFields = 2
+
 // DependencyReader reads dependencies from go.mod.
 type DependencyReader struct{}
 
@@ -33,9 +35,9 @@ func (r *DependencyReader) ReadDependencies(repoPath string) ([]entities.Depende
 			inRequire = false
 			continue
 		}
-		if strings.HasPrefix(line, "require ") {
+		if after, ok := strings.CutPrefix(line, "require "); ok {
 			// single-line require
-			line = strings.TrimPrefix(line, "require ")
+			line = after
 			inRequire = false
 		} else if !inRequire {
 			continue
@@ -45,7 +47,7 @@ func (r *DependencyReader) ReadDependencies(repoPath string) ([]entities.Depende
 			line = strings.TrimSpace(line[:idx])
 		}
 		parts := strings.Fields(line)
-		if len(parts) < 2 {
+		if len(parts) < minRequireFields {
 			continue
 		}
 		deps = append(deps, entities.NewDependency(parts[0], parts[1], "", "go.mod"))

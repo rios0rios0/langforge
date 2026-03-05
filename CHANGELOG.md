@@ -34,3 +34,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implementations for Go, Node/TypeScript, Python, Java/Gradle, Java/Maven, C#, and Terraform
 - LanguageRegistry with auto-detection logic
 - Support packages for file utilities and command execution
+
+### Fixed
+
+- fixed `funcorder` findings by reordering constructors before methods in all 7 language provider files
+- fixed `govet` shadow findings by eliminating variable shadowing in 8 dependency reader/writer files
+- fixed `staticcheck` and `revive` package naming findings by renaming `java_gradle` to `javagradle`, `java_maven` to `javamaven`, and `exec` to `cmdexec`
+- fixed `noctx` finding by using context-aware command execution in `cmdexec` package
+- fixed `unparam` finding by removing always-nil error return from `resolveRefTagLine` in Terraform dependency updater
+- fixed `mnd` finding by extracting magic number constant in Go dependency reader
+- fixed `godoclint` findings by using proper doc comment link syntax
+

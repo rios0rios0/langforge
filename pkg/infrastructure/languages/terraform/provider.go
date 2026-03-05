@@ -1,7 +1,7 @@
 package terraform
 
 import (
-	"github.com/rios0rios0/langforge/pkg/support/exec"
+	"github.com/rios0rios0/langforge/pkg/support/cmdexec"
 )
 
 // Provider is the composite Terraform language provider.
@@ -11,6 +11,17 @@ type Provider struct {
 	*VersionWriter
 	*DependencyReader
 	*DependencyUpdater
+}
+
+// NewProvider creates a new Terraform language provider.
+func NewProvider() *Provider {
+	return &Provider{
+		Detector:          &Detector{},
+		VersionReader:     &VersionReader{},
+		VersionWriter:     &VersionWriter{},
+		DependencyReader:  &DependencyReader{},
+		DependencyUpdater: NewDependencyUpdater(cmdexec.NewDefaultRunner()),
+	}
 }
 
 // FilesChanged resolves the ambiguity between VersionWriter.FilesChanged and
@@ -34,15 +45,4 @@ func (p *Provider) FilesChanged(repoPath string) ([]string, error) {
 		}
 	}
 	return vFiles, nil
-}
-
-// NewProvider creates a new Terraform language provider.
-func NewProvider() *Provider {
-	return &Provider{
-		Detector:          &Detector{},
-		VersionReader:     &VersionReader{},
-		VersionWriter:     &VersionWriter{},
-		DependencyReader:  &DependencyReader{},
-		DependencyUpdater: NewDependencyUpdater(exec.NewDefaultRunner()),
-	}
 }

@@ -2,6 +2,7 @@ package terraform
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"path/filepath"
 	"regexp"
@@ -20,10 +21,14 @@ var (
 type DependencyReader struct{}
 
 // ReadDependencies reads required_providers from versions.tf.
-func (r *DependencyReader) ReadDependencies(repoPath string) ([]entities.Dependency, error) {
+//
+//nolint:gocognit // parsing logic requires nested conditionals
+func (r *DependencyReader) ReadDependencies(
+	repoPath string,
+) ([]entities.Dependency, error) {
 	path := filepath.Join(repoPath, "versions.tf")
 	if !fileutil.Exists(path) {
-		return nil, fmt.Errorf("versions.tf not found")
+		return nil, errors.New("versions.tf not found")
 	}
 	content, err := fileutil.ReadFile(path)
 	if err != nil {

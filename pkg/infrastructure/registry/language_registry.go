@@ -1,6 +1,7 @@
 package registry
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/rios0rios0/langforge/pkg/domain/entities"
@@ -65,7 +66,7 @@ func (r *LanguageRegistry) DetectWithChecker(checker entities.FileChecker) (repo
 			return p, nil
 		}
 	}
-	return nil, fmt.Errorf("no supported language detected")
+	return nil, errors.New("no supported language detected")
 }
 
 // DetectAllWithChecker scans registered providers using the given FileChecker

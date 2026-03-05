@@ -1,4 +1,4 @@
-package java_maven
+package javamaven
 
 import (
 	"encoding/xml"
@@ -30,7 +30,7 @@ func (r *DependencyReader) ReadDependencies(repoPath string) ([]entities.Depende
 		return nil, fmt.Errorf("reading pom.xml: %w", err)
 	}
 	var proj pomDeps
-	if err := xml.Unmarshal([]byte(content), &proj); err != nil {
+	if err = xml.Unmarshal([]byte(content), &proj); err != nil {
 		return nil, fmt.Errorf("parsing pom.xml: %w", err)
 	}
 	var deps []entities.Dependency

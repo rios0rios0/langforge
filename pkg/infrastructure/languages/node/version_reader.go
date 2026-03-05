@@ -2,6 +2,7 @@ package node
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"path/filepath"
 
@@ -26,11 +27,11 @@ func (r *VersionReader) ReadVersion(repoPath string) (entities.Version, error) {
 	var pkg struct {
 		Version string `json:"version"`
 	}
-	if err := json.Unmarshal([]byte(content), &pkg); err != nil {
+	if err = json.Unmarshal([]byte(content), &pkg); err != nil {
 		return entities.Version{}, fmt.Errorf("parsing package.json: %w", err)
 	}
 	if pkg.Version == "" {
-		return entities.Version{}, fmt.Errorf("no version field in package.json")
+		return entities.Version{}, errors.New("no version field in package.json")
 	}
 	return entities.NewVersion(pkg.Version)
 }

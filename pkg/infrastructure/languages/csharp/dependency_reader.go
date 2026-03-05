@@ -37,7 +37,7 @@ func (r *DependencyReader) ReadDependencies(repoPath string) ([]entities.Depende
 		return nil, fmt.Errorf("reading %s: %w", csprojFile, err)
 	}
 	var proj csprojDeps
-	if err := xml.Unmarshal([]byte(content), &proj); err != nil {
+	if err = xml.Unmarshal([]byte(content), &proj); err != nil {
 		return nil, fmt.Errorf("parsing %s: %w", csprojFile, err)
 	}
 	var deps []entities.Dependency
