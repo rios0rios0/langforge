@@ -13,8 +13,9 @@ type LanguageProviderStub struct {
 	version        entities.Version
 	versionErr     error
 	versionFiles   []string
-	filesChanged   []string
-	writeErr       error
+	filesChanged    []string
+	filesChangedErr error
+	writeErr        error
 	deps           []entities.Dependency
 	depsErr        error
 	updateErr      error
@@ -45,7 +46,7 @@ func (s *LanguageProviderStub) WriteVersion(_ string, _ entities.Version) error 
 
 // FilesChanged returns the configured files changed.
 func (s *LanguageProviderStub) FilesChanged(_ string) ([]string, error) {
-	return s.filesChanged, nil
+	return s.filesChanged, s.filesChangedErr
 }
 
 // ReadDependencies returns the configured dependencies.
@@ -106,6 +107,12 @@ func (b *LanguageProviderStubBuilder) WithVersion(v entities.Version, err error)
 // WithWriteError sets the write error.
 func (b *LanguageProviderStubBuilder) WithWriteError(err error) *LanguageProviderStubBuilder {
 	b.stub.writeErr = err
+	return b
+}
+
+// WithFilesChangedError sets the error returned by FilesChanged.
+func (b *LanguageProviderStubBuilder) WithFilesChangedError(err error) *LanguageProviderStubBuilder {
+	b.stub.filesChangedErr = err
 	return b
 }
 

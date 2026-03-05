@@ -5,10 +5,10 @@ import (
 	"path/filepath"
 )
 
-// Exists returns true if the path exists.
+// Exists returns true if the path exists and is accessible.
 func Exists(path string) bool {
 	_, err := os.Stat(path)
-	return !os.IsNotExist(err)
+	return err == nil
 }
 
 // ReadFile reads the content of a file and returns it as a string.

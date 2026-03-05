@@ -28,11 +28,7 @@ func (u *DependencyUpdater) FilesChanged(repoPath string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	result := make([]string, len(matches))
-	for i, m := range matches {
-		result[i] = m
-	}
-	return result, nil
+	return matches, nil
 }
 
 // UpdateAll runs dotnet outdated --upgrade.
