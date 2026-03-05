@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- changed the Go version to `1.26.0` and updated all module dependencies
+
 ### Added
 - Initial library scaffold with language abstraction layer
 - Language detection, version reading/writing, and dependency management interfaces
