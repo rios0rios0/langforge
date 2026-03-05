@@ -38,16 +38,19 @@ func readRequirementsTxt(path string) ([]entities.Dependency, error) {
 		if line == "" || strings.HasPrefix(line, "#") {
 			continue
 		}
+		matched := false
 		for _, sep := range []string{"==", ">=", "<=", "!=", "~=", ">"} {
 			if idx := strings.Index(line, sep); idx != -1 {
 				name := strings.TrimSpace(line[:idx])
 				ver := strings.TrimSpace(line[idx+len(sep):])
 				deps = append(deps, entities.NewDependency(name, sep+ver, "", "requirements.txt"))
-				goto nextLine
+				matched = true
+				break
 			}
 		}
-		deps = append(deps, entities.NewDependency(line, "", "", "requirements.txt"))
-	nextLine:
+		if !matched {
+			deps = append(deps, entities.NewDependency(line, "", "", "requirements.txt"))
+		}
 	}
 	return deps, nil
 }
