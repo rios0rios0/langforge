@@ -3,7 +3,6 @@ package terraform
 import (
 	"bufio"
 	"fmt"
-	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -38,7 +37,7 @@ func (u *DependencyUpdater) FilesChanged(repoPath string) ([]string, error) {
 	}
 	result := make([]string, len(matches))
 	for i, m := range matches {
-		result[i] = filepath.Join(repoPath, filepath.Base(m))
+		result[i] = m
 	}
 	return result, nil
 }

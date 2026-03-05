@@ -1,8 +1,6 @@
 package csharp
 
 import (
-	"path/filepath"
-
 	"github.com/rios0rios0/langforge/pkg/support/exec"
 	"github.com/rios0rios0/langforge/pkg/support/fileutil"
 )
@@ -32,7 +30,7 @@ func (u *DependencyUpdater) FilesChanged(repoPath string) ([]string, error) {
 	}
 	result := make([]string, len(matches))
 	for i, m := range matches {
-		result[i] = filepath.Join(repoPath, filepath.Base(m))
+		result[i] = m
 	}
 	return result, nil
 }
