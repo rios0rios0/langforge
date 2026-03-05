@@ -1,3 +1,5 @@
+//go:build unit
+
 package python_test
 
 import (

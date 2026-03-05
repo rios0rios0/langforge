@@ -1,3 +1,5 @@
+//go:build unit
+
 package golang_test
 
 import (

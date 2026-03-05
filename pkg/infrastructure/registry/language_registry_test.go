@@ -1,3 +1,5 @@
+//go:build unit
+
 package registry_test
 
 import (
@@ -7,8 +9,9 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/rios0rios0/langforge/pkg/domain/entities"
+	"github.com/rios0rios0/langforge/pkg/domain/repositories"
 	"github.com/rios0rios0/langforge/pkg/infrastructure/registry"
-	"github.com/rios0rios0/langforge/test/domain/entitybuilders"
+	"github.com/rios0rios0/langforge/test/builders"
 )
 
 func TestNewLanguageRegistry(t *testing.T) {
@@ -34,9 +37,9 @@ func TestLanguageRegistryRegisterAndGet(t *testing.T) {
 
 		// given
 		reg := registry.NewLanguageRegistry()
-		stub := entitybuilders.NewLanguageProviderStubBuilder().
+		stub := builders.NewLanguageProviderStubBuilder().
 			WithLanguage(entities.LanguageGo).
-			Build()
+			Build().(repositories.LanguageProvider)
 		reg.Register(stub)
 
 		// when
@@ -69,10 +72,10 @@ func TestLanguageRegistryDetect(t *testing.T) {
 
 		// given
 		reg := registry.NewLanguageRegistry()
-		stub := entitybuilders.NewLanguageProviderStubBuilder().
+		stub := builders.NewLanguageProviderStubBuilder().
 			WithLanguage(entities.LanguageGo).
 			WithDetectResult(true, nil).
-			Build()
+			Build().(repositories.LanguageProvider)
 		reg.Register(stub)
 
 		// when
@@ -88,10 +91,10 @@ func TestLanguageRegistryDetect(t *testing.T) {
 
 		// given
 		reg := registry.NewLanguageRegistry()
-		stub := entitybuilders.NewLanguageProviderStubBuilder().
+		stub := builders.NewLanguageProviderStubBuilder().
 			WithLanguage(entities.LanguageGo).
 			WithDetectResult(false, nil).
-			Build()
+			Build().(repositories.LanguageProvider)
 		reg.Register(stub)
 
 		// when
@@ -111,9 +114,9 @@ func TestLanguageRegistryLanguages(t *testing.T) {
 		// given
 		reg := registry.NewLanguageRegistry()
 		for _, lang := range []entities.Language{entities.LanguageGo, entities.LanguageNode} {
-			stub := entitybuilders.NewLanguageProviderStubBuilder().
+			stub := builders.NewLanguageProviderStubBuilder().
 				WithLanguage(lang).
-				Build()
+				Build().(repositories.LanguageProvider)
 			reg.Register(stub)
 		}
 
