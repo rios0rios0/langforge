@@ -52,6 +52,38 @@ func (r *LanguageRegistry) Get(lang entities.Language) (repositories.LanguagePro
 	return p, nil
 }
 
+// DetectWithChecker scans registered providers using the given FileChecker
+// and returns the first matching LanguageProvider. This enables detection
+// against remote APIs or other non-filesystem sources.
+func (r *LanguageRegistry) DetectWithChecker(checker entities.FileChecker) (repositories.LanguageProvider, error) {
+	for _, p := range r.providers {
+		matched, err := repositories.DetectWith(p, checker)
+		if err != nil {
+			return nil, fmt.Errorf("detection error for %s: %w", p.Language(), err)
+		}
+		if matched {
+			return p, nil
+		}
+	}
+	return nil, fmt.Errorf("no supported language detected")
+}
+
+// DetectAllWithChecker scans registered providers using the given FileChecker
+// and returns all matching LanguageProviders.
+func (r *LanguageRegistry) DetectAllWithChecker(checker entities.FileChecker) ([]repositories.LanguageProvider, error) {
+	var matched []repositories.LanguageProvider
+	for _, p := range r.providers {
+		ok, err := repositories.DetectWith(p, checker)
+		if err != nil {
+			return nil, fmt.Errorf("detection error for %s: %w", p.Language(), err)
+		}
+		if ok {
+			matched = append(matched, p)
+		}
+	}
+	return matched, nil
+}
+
 // Languages returns the list of registered language names.
 func (r *LanguageRegistry) Languages() []entities.Language {
 	langs := make([]entities.Language, 0, len(r.byLang))

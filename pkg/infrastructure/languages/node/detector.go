@@ -1,9 +1,8 @@
 package node
 
 import (
-	"path/filepath"
-
 	"github.com/rios0rios0/langforge/pkg/domain/entities"
+	"github.com/rios0rios0/langforge/pkg/domain/repositories"
 	"github.com/rios0rios0/langforge/pkg/support/fileutil"
 )
 
@@ -15,9 +14,9 @@ func (d *Detector) DetectionFiles() []string {
 	return []string{"package.json", "tsconfig.json"}
 }
 
-// Detect returns true if package.json exists in repoPath.
+// Detect returns true if package.json or tsconfig.json exists in repoPath.
 func (d *Detector) Detect(repoPath string) (bool, error) {
-	return fileutil.Exists(filepath.Join(repoPath, "package.json")), nil
+	return repositories.DetectWith(d, fileutil.LocalFileChecker(repoPath))
 }
 
 // Language returns the Node language identifier.

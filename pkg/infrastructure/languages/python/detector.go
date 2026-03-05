@@ -1,9 +1,8 @@
 package python
 
 import (
-	"path/filepath"
-
 	"github.com/rios0rios0/langforge/pkg/domain/entities"
+	"github.com/rios0rios0/langforge/pkg/domain/repositories"
 	"github.com/rios0rios0/langforge/pkg/support/fileutil"
 )
 
@@ -12,17 +11,12 @@ type Detector struct{}
 
 // DetectionFiles returns the files that identify a Python project.
 func (d *Detector) DetectionFiles() []string {
-	return []string{"pyproject.toml", "setup.py"}
+	return []string{"pyproject.toml", "setup.py", "requirements.txt"}
 }
 
-// Detect returns true if pyproject.toml or setup.py exists in repoPath.
+// Detect returns true if pyproject.toml, setup.py, or requirements.txt exists in repoPath.
 func (d *Detector) Detect(repoPath string) (bool, error) {
-	for _, f := range d.DetectionFiles() {
-		if fileutil.Exists(filepath.Join(repoPath, f)) {
-			return true, nil
-		}
-	}
-	return false, nil
+	return repositories.DetectWith(d, fileutil.LocalFileChecker(repoPath))
 }
 
 // Language returns the Python language identifier.

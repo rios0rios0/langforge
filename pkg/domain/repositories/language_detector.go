@@ -16,3 +16,19 @@ type LanguageDetector interface {
 	// Language returns the canonical Language entity for this detector.
 	Language() entities.Language
 }
+
+// DetectWith checks if a language is present using the given FileChecker
+// against the detector's DetectionFiles. This enables the same detection
+// logic to work with both local filesystem and remote API-based file access.
+func DetectWith(detector LanguageDetector, checker entities.FileChecker) (bool, error) {
+	for _, f := range detector.DetectionFiles() {
+		found, err := checker(f)
+		if err != nil {
+			return false, err
+		}
+		if found {
+			return true, nil
+		}
+	}
+	return false, nil
+}
