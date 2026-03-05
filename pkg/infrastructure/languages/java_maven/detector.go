@@ -1,9 +1,8 @@
 package java_maven
 
 import (
-	"path/filepath"
-
 	"github.com/rios0rios0/langforge/pkg/domain/entities"
+	"github.com/rios0rios0/langforge/pkg/domain/repositories"
 	"github.com/rios0rios0/langforge/pkg/support/fileutil"
 )
 
@@ -17,7 +16,7 @@ func (d *Detector) DetectionFiles() []string {
 
 // Detect returns true if pom.xml exists in repoPath.
 func (d *Detector) Detect(repoPath string) (bool, error) {
-	return fileutil.Exists(filepath.Join(repoPath, "pom.xml")), nil
+	return repositories.DetectWith(d, fileutil.LocalFileChecker(repoPath))
 }
 
 // Language returns the Java/Maven language identifier.

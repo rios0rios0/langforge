@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/rios0rios0/langforge/pkg/domain/entities"
+	"github.com/rios0rios0/langforge/pkg/domain/repositories"
 	"github.com/rios0rios0/langforge/pkg/support/fileutil"
 )
 
@@ -18,16 +19,7 @@ func (d *Detector) DetectionFiles() []string {
 
 // Detect returns true if any *.sln or *.csproj file exists in repoPath.
 func (d *Detector) Detect(repoPath string) (bool, error) {
-	for _, pattern := range d.DetectionFiles() {
-		matches, err := fileutil.GlobFiles(repoPath, pattern)
-		if err != nil {
-			return false, fmt.Errorf("globbing %s: %w", pattern, err)
-		}
-		if len(matches) > 0 {
-			return true, nil
-		}
-	}
-	return false, nil
+	return repositories.DetectWith(d, fileutil.LocalFileChecker(repoPath))
 }
 
 // Language returns the C# language identifier.
