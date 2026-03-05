@@ -46,7 +46,8 @@ func (r *DependencyReader) ReadDependencies(repoPath string) ([]entities.Depende
 		}
 		if inRequiredProviders && strings.HasSuffix(line, "{") {
 			inProviderBlock = true
-			currentProvider = strings.TrimSuffix(strings.TrimSpace(line), " {")
+			// Extract the provider name as the first whitespace-delimited token before '{'
+			currentProvider = strings.Fields(line)[0]
 			currentSource = ""
 			currentVersion = ""
 			continue

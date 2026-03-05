@@ -73,7 +73,13 @@ func readPyprojectDeps(path string) ([]entities.Dependency, error) {
 			break
 		}
 		if inDeps {
-			line = strings.Trim(line, `"',`)
+			// Strip surrounding quotes and trailing commas without touching inner characters
+			for _, q := range []string{`"`, `'`} {
+				line = strings.TrimPrefix(line, q)
+				line = strings.TrimSuffix(line, q)
+			}
+			line = strings.TrimSuffix(line, ",")
+			line = strings.TrimSpace(line)
 			if line == "" {
 				continue
 			}
