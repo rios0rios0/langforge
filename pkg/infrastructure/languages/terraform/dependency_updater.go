@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/rios0rios0/langforge/pkg/support/exec"
+	"github.com/rios0rios0/langforge/pkg/support/cmdexec"
 	"github.com/rios0rios0/langforge/pkg/support/fileutil"
 )
 
@@ -14,11 +14,11 @@ var tfRefTagRe = regexp.MustCompile(`\?ref=([^\s"]+)`)
 
 // DependencyUpdater performs custom ref-tag resolution for Terraform modules.
 type DependencyUpdater struct {
-	runner exec.Runner
+	runner cmdexec.Runner
 }
 
 // NewDependencyUpdater creates a DependencyUpdater with the default runner.
-func NewDependencyUpdater(runner exec.Runner) *DependencyUpdater {
+func NewDependencyUpdater(runner cmdexec.Runner) *DependencyUpdater {
 	return &DependencyUpdater{runner: runner}
 }
 
@@ -50,7 +50,7 @@ func UpdateRefTags(repoPath string, resolver func(source string) (string, error)
 		return fmt.Errorf("globbing *.tf: %w", err)
 	}
 	for _, path := range matches {
-		if err := updateRefTagsInFile(path, resolver); err != nil {
+		if err = updateRefTagsInFile(path, resolver); err != nil {
 			return err
 		}
 	}
@@ -71,11 +71,7 @@ func updateRefTagsInFile(
 	for scanner.Scan() {
 		line := scanner.Text()
 		if tfRefTagRe.MatchString(line) {
-			newLine, err := resolveRefTagLine(line, resolver)
-			if err != nil {
-				return err
-			}
-			line = newLine
+			line = resolveRefTagLine(line, resolver)
 		}
 		out.WriteString(line + "\n")
 	}
@@ -85,14 +81,14 @@ func updateRefTagsInFile(
 func resolveRefTagLine(
 	line string,
 	resolver func(source string) (string, error),
-) (string, error) {
+) string {
 	return tfRefTagRe.ReplaceAllStringFunc(line, func(match string) string {
 		newTag, err := resolver(match)
 		if err != nil {
 			return match
 		}
 		return fmt.Sprintf("?ref=%s", newTag)
-	}), nil
+	})
 }
 
 // ProviderVersion represents a resolved Terraform provider version.

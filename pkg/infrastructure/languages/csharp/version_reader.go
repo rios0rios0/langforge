@@ -37,7 +37,7 @@ func (r *VersionReader) ReadVersion(repoPath string) (entities.Version, error) {
 		return entities.Version{}, fmt.Errorf("reading %s: %w", csprojFile, err)
 	}
 	var proj csprojProject
-	if err := xml.Unmarshal([]byte(content), &proj); err != nil {
+	if err = xml.Unmarshal([]byte(content), &proj); err != nil {
 		return entities.Version{}, fmt.Errorf("parsing %s: %w", csprojFile, err)
 	}
 	for _, pg := range proj.PropertyGroups {

@@ -25,7 +25,7 @@ func (w *VersionWriter) WriteVersion(repoPath string, version entities.Version) 
 		return fmt.Errorf("reading package.json: %w", err)
 	}
 	var raw map[string]json.RawMessage
-	if err := json.Unmarshal([]byte(content), &raw); err != nil {
+	if err = json.Unmarshal([]byte(content), &raw); err != nil {
 		return fmt.Errorf("parsing package.json: %w", err)
 	}
 	versionJSON, err := json.Marshal(version.String())

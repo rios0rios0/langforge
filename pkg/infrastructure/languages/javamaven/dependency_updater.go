@@ -1,18 +1,18 @@
-package java_maven
+package javamaven
 
 import (
 	"path/filepath"
 
-	"github.com/rios0rios0/langforge/pkg/support/exec"
+	"github.com/rios0rios0/langforge/pkg/support/cmdexec"
 )
 
 // DependencyUpdater runs mvn versions:use-latest-releases.
 type DependencyUpdater struct {
-	runner exec.Runner
+	runner cmdexec.Runner
 }
 
 // NewDependencyUpdater creates a DependencyUpdater with the default runner.
-func NewDependencyUpdater(runner exec.Runner) *DependencyUpdater {
+func NewDependencyUpdater(runner cmdexec.Runner) *DependencyUpdater {
 	return &DependencyUpdater{runner: runner}
 }
 

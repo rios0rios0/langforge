@@ -1,17 +1,17 @@
 package csharp
 
 import (
-	"github.com/rios0rios0/langforge/pkg/support/exec"
+	"github.com/rios0rios0/langforge/pkg/support/cmdexec"
 	"github.com/rios0rios0/langforge/pkg/support/fileutil"
 )
 
 // DependencyUpdater runs dotnet outdated --upgrade.
 type DependencyUpdater struct {
-	runner exec.Runner
+	runner cmdexec.Runner
 }
 
 // NewDependencyUpdater creates a DependencyUpdater with the default runner.
-func NewDependencyUpdater(runner exec.Runner) *DependencyUpdater {
+func NewDependencyUpdater(runner cmdexec.Runner) *DependencyUpdater {
 	return &DependencyUpdater{runner: runner}
 }
 

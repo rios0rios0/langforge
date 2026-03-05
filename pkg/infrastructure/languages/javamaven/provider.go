@@ -1,16 +1,27 @@
-package java_gradle
+package javamaven
 
 import (
-	"github.com/rios0rios0/langforge/pkg/support/exec"
+	"github.com/rios0rios0/langforge/pkg/support/cmdexec"
 )
 
-// Provider is the composite Java/Gradle language provider.
+// Provider is the composite Java/Maven language provider.
 type Provider struct {
 	*Detector
 	*VersionReader
 	*VersionWriter
 	*DependencyReader
 	*DependencyUpdater
+}
+
+// NewProvider creates a new Java/Maven language provider.
+func NewProvider() *Provider {
+	return &Provider{
+		Detector:          &Detector{},
+		VersionReader:     &VersionReader{},
+		VersionWriter:     &VersionWriter{},
+		DependencyReader:  &DependencyReader{},
+		DependencyUpdater: NewDependencyUpdater(cmdexec.NewDefaultRunner()),
+	}
 }
 
 // FilesChanged resolves the ambiguity between VersionWriter.FilesChanged and
@@ -34,15 +45,4 @@ func (p *Provider) FilesChanged(repoPath string) ([]string, error) {
 		}
 	}
 	return vFiles, nil
-}
-
-// NewProvider creates a new Java/Gradle language provider.
-func NewProvider() *Provider {
-	return &Provider{
-		Detector:          &Detector{},
-		VersionReader:     &VersionReader{},
-		VersionWriter:     &VersionWriter{},
-		DependencyReader:  &DependencyReader{},
-		DependencyUpdater: NewDependencyUpdater(exec.NewDefaultRunner()),
-	}
 }

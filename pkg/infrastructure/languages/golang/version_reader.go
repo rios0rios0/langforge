@@ -2,6 +2,7 @@ package golang
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"path/filepath"
 	"regexp"
@@ -35,5 +36,5 @@ func (r *VersionReader) ReadVersion(repoPath string) (entities.Version, error) {
 			return entities.NewVersion(strings.TrimSpace(m[1]))
 		}
 	}
-	return entities.Version{}, fmt.Errorf("no version comment found in go.mod (expected '// version: X.Y.Z')")
+	return entities.Version{}, errors.New("no version comment found in go.mod (expected '// version: X.Y.Z')")
 }

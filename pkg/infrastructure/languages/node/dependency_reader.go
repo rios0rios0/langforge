@@ -22,7 +22,7 @@ func (r *DependencyReader) ReadDependencies(repoPath string) ([]entities.Depende
 		Dependencies    map[string]string `json:"dependencies"`
 		DevDependencies map[string]string `json:"devDependencies"`
 	}
-	if err := json.Unmarshal([]byte(content), &pkg); err != nil {
+	if err = json.Unmarshal([]byte(content), &pkg); err != nil {
 		return nil, fmt.Errorf("parsing package.json: %w", err)
 	}
 	var deps []entities.Dependency

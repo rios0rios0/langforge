@@ -1,7 +1,8 @@
-package java_gradle
+package javagradle
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"path/filepath"
 	"regexp"
@@ -17,7 +18,11 @@ var gradleDependencyRe = regexp.MustCompile(`["']([^:'"]+):([^:'"]+):([^'"]+)["'
 type DependencyReader struct{}
 
 // ReadDependencies parses build.gradle and returns the list of dependencies.
-func (r *DependencyReader) ReadDependencies(repoPath string) ([]entities.Dependency, error) {
+//
+//nolint:gocognit // parsing logic requires nested conditionals
+func (r *DependencyReader) ReadDependencies(
+	repoPath string,
+) ([]entities.Dependency, error) {
 	for _, filename := range []string{"build.gradle", "build.gradle.kts"} {
 		path := filepath.Join(repoPath, filename)
 		if !fileutil.Exists(path) {
@@ -48,5 +53,5 @@ func (r *DependencyReader) ReadDependencies(repoPath string) ([]entities.Depende
 		}
 		return deps, nil
 	}
-	return nil, fmt.Errorf("no build.gradle or build.gradle.kts found")
+	return nil, errors.New("no build.gradle or build.gradle.kts found")
 }

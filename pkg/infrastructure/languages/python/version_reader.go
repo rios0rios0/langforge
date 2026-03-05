@@ -2,6 +2,7 @@ package python
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"path/filepath"
 	"regexp"
@@ -46,7 +47,7 @@ func (r *VersionReader) ReadVersion(repoPath string) (entities.Version, error) {
 			return entities.NewVersion(m[1])
 		}
 	}
-	return entities.Version{}, fmt.Errorf("no version found in pyproject.toml or __init__.py")
+	return entities.Version{}, errors.New("no version found in pyproject.toml or __init__.py")
 }
 
 func extractVersionFromPyproject(content string) string {

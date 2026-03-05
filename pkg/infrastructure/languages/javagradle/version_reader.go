@@ -1,7 +1,8 @@
-package java_gradle
+package javagradle
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"path/filepath"
 	"regexp"
@@ -40,5 +41,5 @@ func (r *VersionReader) ReadVersion(repoPath string) (entities.Version, error) {
 			}
 		}
 	}
-	return entities.Version{}, fmt.Errorf("no version found in build.gradle or build.gradle.kts")
+	return entities.Version{}, errors.New("no version found in build.gradle or build.gradle.kts")
 }
