@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - changed the Go version to `1.26.0` and updated all module dependencies
 - refactored all 7 language detectors to use `DetectWith` internally, eliminating duplicated detection logic
+- changed the Go version to `1.26.1` and updated all module dependencies
 
 ### Added
 - Initial library scaffold with language abstraction layer
