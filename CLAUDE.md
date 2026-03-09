@@ -13,13 +13,13 @@ make setup             # clone/update the pipelines repository (first time)
 make lint              # run golangci-lint via pipelines
 make test              # run all tests via pipelines
 make sast              # run full SAST suite (CodeQL, Semgrep, Trivy, Hadolint, Gitleaks)
-go build ./...         # build all packages
-go test ./...          # run all tests directly
-go test -v ./pkg/infrastructure/languages/golang  # run tests for a specific package
-go test -run TestGoVersionReader ./...             # run a single test by name
+go build ./...                                               # build all packages
+go test -tags=unit ./...                                     # run all tests directly
+go test -tags=unit -v ./pkg/infrastructure/languages/golang  # run tests for a specific package
+go test -tags=unit -run TestGoVersionReader ./...             # run a single test by name
 ```
 
-Always use `make lint` / `make test` / `make sast` instead of calling tool binaries directly.
+Prefer `make lint` / `make test` / `make sast` for CI-equivalent validation. Direct `go test -tags=unit` is fine for quick local iteration.
 
 ## Architecture
 
