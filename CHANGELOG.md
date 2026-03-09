@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- added `LanguagePipeline` and `LanguageDockerfile` constants for CI/CD and container ecosystem detection
+- added `PipelineDetector` for detecting repositories with GitHub Actions workflows and Azure DevOps pipeline templates
+- added `DockerfileDetector` for detecting repositories containing Dockerfile files
+
 ## [0.1.0] - 2026-03-06
 
 ### Added

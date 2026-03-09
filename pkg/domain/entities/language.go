@@ -13,6 +13,8 @@ const (
 	LanguageCSharp     Language = "csharp"
 	LanguageTerraform  Language = "terraform"
 	LanguageYAML       Language = "yaml"
+	LanguagePipeline   Language = "pipeline"
+	LanguageDockerfile Language = "dockerfile"
 	LanguageUnknown    Language = "unknown"
 )
 
