@@ -48,12 +48,23 @@ func IsGlobPattern(path string) bool {
 	return strings.ContainsAny(path, "*?[")
 }
 
-// ExtractExtension extracts the file extension from a glob pattern.
-// For example, "*.tf" returns ".tf" and "*.hcl" returns ".hcl".
-// Returns the input unchanged if no dot is found.
+// ExtractExtension extracts the file extension from the last path element
+// of a glob pattern. For example, "*.tf" returns ".tf" and "src/*.go"
+// returns ".go". Returns the input unchanged if no extension is found.
+// It operates on the base name only, so directory dots (e.g., "dir.with.dot/*")
+// do not produce false extensions.
 func ExtractExtension(pattern string) string {
-	if idx := strings.LastIndex(pattern, "."); idx >= 0 {
-		return pattern[idx:]
+	base := filepath.Base(pattern)
+
+	idx := strings.LastIndex(base, ".")
+	if idx < 0 {
+		return pattern
 	}
-	return pattern
+
+	ext := base[idx:]
+	if strings.ContainsAny(ext, `/\`) {
+		return pattern
+	}
+
+	return ext
 }

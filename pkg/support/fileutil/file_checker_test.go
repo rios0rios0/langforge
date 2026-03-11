@@ -59,6 +59,20 @@ func TestExtractExtension(t *testing.T) {
 		assert.Equal(t, ".go", fileutil.ExtractExtension("src/*.go"))
 	})
 
+	t.Run("should extract extension from base name when directory has dots", func(t *testing.T) {
+		t.Parallel()
+
+		// given / when / then
+		assert.Equal(t, ".go", fileutil.ExtractExtension("dir.with.dot/*.go"))
+	})
+
+	t.Run("should return input when directory has dots but base has no extension", func(t *testing.T) {
+		t.Parallel()
+
+		// given / when / then
+		assert.Equal(t, "dir.with.dot/*", fileutil.ExtractExtension("dir.with.dot/*"))
+	})
+
 	t.Run("should return input when no dot is found", func(t *testing.T) {
 		t.Parallel()
 
