@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - added `NewFileChecker`, `IsGlobPattern`, and `ExtractExtension` utilities in `pkg/support/fileutil/` to enable building remote-compatible `FileChecker` instances from custom callbacks, eliminating the need for consumers to reimplement glob-vs-exact dispatch
+- added `VersionFetcher` type and `FetchLatestGoVersion`, `FetchLatestNodeVersion`, `FetchLatestPythonVersion`, `FetchLatestJavaVersion`, `FetchLatestTerraformVersion` helpers in `pkg/infrastructure/versions/` for fetching latest stable versions from public APIs
 
 ## [0.2.0] - 2026-03-09
 
