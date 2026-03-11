@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - added `NewFileChecker`, `IsGlobPattern`, and `ExtractExtension` utilities in `pkg/support/fileutil/` to enable building remote-compatible `FileChecker` instances from custom callbacks, eliminating the need for consumers to reimplement glob-vs-exact dispatch
 - added `VersionFetcher` type and `FetchLatestGoVersion`, `FetchLatestNodeVersion`, `FetchLatestPythonVersion`, `FetchLatestJavaVersion`, `FetchLatestTerraformVersion` helpers in `pkg/infrastructure/versions/` for fetching latest stable versions from public APIs
 
+### Changed
+
+- changed `fetchJSON` to respect caller-provided context deadlines instead of hard-coding an HTTP client timeout
+- changed `fetchJSON` to limit response body size via `io.LimitReader` to prevent memory blowups from misbehaving endpoints
+- changed `isActiveEOL` to compare dates in UTC and treat the EOL date as inclusive
+
 ## [0.2.0] - 2026-03-09
 
 ### Added

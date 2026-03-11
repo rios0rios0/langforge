@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -131,16 +132,26 @@ func fetchEndOfLifeLatest(
 
 // --- Helpers ---
 
+// maxResponseSize limits the size of HTTP response bodies to prevent memory/CPU
+// blowups if an endpoint misbehaves or returns unexpected content.
+const maxResponseSize = 10 * 1024 * 1024 // 10 MB
+
 // fetchJSON performs an HTTP GET and decodes the JSON response into target.
 func fetchJSON(ctx context.Context, url string, target any) error {
-	client := &http.Client{Timeout: fetchTimeout}
+	// Respect caller-provided context deadlines; only apply the default timeout
+	// when the context does not already have one.
+	if _, ok := ctx.Deadline(); !ok {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, fetchTimeout)
+		defer cancel()
+	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return fmt.Errorf("failed to create request: %w", err)
 	}
 
-	resp, err := client.Do(req)
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return err
 	}
@@ -150,12 +161,13 @@ func fetchJSON(ctx context.Context, url string, target any) error {
 		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
-	return json.NewDecoder(resp.Body).Decode(target)
+	return json.NewDecoder(io.LimitReader(resp.Body, maxResponseSize)).Decode(target)
 }
 
 // isActiveEOL returns true if the endoflife.date EOL field indicates
 // the release is still active. The field is false when active, or a date
-// string when it has an EOL date.
+// string when it has an EOL date. The EOL date is treated as inclusive
+// (the release is still active on its EOL day).
 func isActiveEOL(eol any) bool {
 	switch v := eol.(type) {
 	case bool:
@@ -165,7 +177,10 @@ func isActiveEOL(eol any) bool {
 		if err != nil {
 			return false
 		}
-		return eolDate.After(time.Now())
+		// Compare dates (not full timestamps) in UTC and treat the EOL date as inclusive.
+		now := time.Now().UTC()
+		today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
+		return !today.After(eolDate)
 	default:
 		return false
 	}
