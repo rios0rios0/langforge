@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - changed `fetchJSON` to respect caller-provided context deadlines instead of hard-coding an HTTP client timeout
 - changed `fetchJSON` to limit response body size via `io.LimitReader` to prevent memory blowups from misbehaving endpoints
 - changed `isActiveEOL` to compare dates in UTC and treat the EOL date as inclusive
+- changed the Go version to `1.26.1` and updated all module dependencies
 
 ## [0.2.0] - 2026-03-09
 
