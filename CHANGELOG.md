@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- added `httptest`-based unit tests for `fetchJSON`, `fetchEndOfLifeLatest`, and all version fetcher selection/filtering logic
+
+### Changed
+
+- changed `fetchJSON` and `fetchEndOfLifeLatest` to accept an injectable `*http.Client` parameter for testability
+
+### Fixed
+
+- fixed `FetchLatestJavaVersion` returning 404 by switching from the non-existent `/api/java.json` endpoint to `/api/amazon-corretto.json` on endoflife.date
+
 ## [0.3.1] - 2026-03-14
 
 ### Changed
