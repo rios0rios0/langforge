@@ -84,9 +84,10 @@ func FetchLatestPythonVersion(ctx context.Context) (string, error) {
 
 // --- Java ---
 
-// FetchLatestJavaVersion fetches the latest LTS Java version.
+// FetchLatestJavaVersion fetches the latest LTS Java version using Amazon Corretto
+// as the reference distribution (endoflife.date does not provide a generic "java" product).
 func FetchLatestJavaVersion(ctx context.Context) (string, error) {
-	return fetchEndOfLifeLatest(ctx, "https://endoflife.date/api/java.json", "Java",
+	return fetchEndOfLifeLatest(ctx, "https://endoflife.date/api/amazon-corretto.json", "Java",
 		func(r eolRelease) bool { return r.LTS && isActiveEOL(r.EOL) },
 	)
 }
