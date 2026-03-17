@@ -26,7 +26,7 @@ type goRelease struct {
 // FetchLatestGoVersion fetches the latest stable Go version from the official API.
 func FetchLatestGoVersion(ctx context.Context) (string, error) {
 	var releases []goRelease
-	if err := fetchJSON(ctx, "https://go.dev/dl/?mode=json", &releases); err != nil {
+	if err := fetchJSON(ctx, http.DefaultClient, "https://go.dev/dl/?mode=json", &releases); err != nil {
 		return "", fmt.Errorf("failed to fetch Go versions: %w", err)
 	}
 
@@ -49,7 +49,7 @@ type nodeRelease struct {
 // FetchLatestNodeVersion fetches the latest LTS Node.js version.
 func FetchLatestNodeVersion(ctx context.Context) (string, error) {
 	var releases []nodeRelease
-	if err := fetchJSON(ctx, "https://nodejs.org/dist/index.json", &releases); err != nil {
+	if err := fetchJSON(ctx, http.DefaultClient, "https://nodejs.org/dist/index.json", &releases); err != nil {
 		return "", fmt.Errorf("failed to fetch Node.js versions: %w", err)
 	}
 
@@ -77,7 +77,7 @@ func isLTSRelease(release nodeRelease) bool {
 
 // FetchLatestPythonVersion fetches the latest active Python version.
 func FetchLatestPythonVersion(ctx context.Context) (string, error) {
-	return fetchEndOfLifeLatest(ctx, "https://endoflife.date/api/python.json", "Python",
+	return fetchEndOfLifeLatest(ctx, http.DefaultClient, "https://endoflife.date/api/python.json", "Python",
 		func(r eolRelease) bool { return isActiveEOL(r.EOL) },
 	)
 }
@@ -87,7 +87,7 @@ func FetchLatestPythonVersion(ctx context.Context) (string, error) {
 // FetchLatestJavaVersion fetches the latest LTS Java version using Amazon Corretto
 // as the reference distribution (endoflife.date does not provide a generic "java" product).
 func FetchLatestJavaVersion(ctx context.Context) (string, error) {
-	return fetchEndOfLifeLatest(ctx, "https://endoflife.date/api/amazon-corretto.json", "Java",
+	return fetchEndOfLifeLatest(ctx, http.DefaultClient, "https://endoflife.date/api/amazon-corretto.json", "Java",
 		func(r eolRelease) bool { return r.LTS && isActiveEOL(r.EOL) },
 	)
 }
@@ -96,7 +96,7 @@ func FetchLatestJavaVersion(ctx context.Context) (string, error) {
 
 // FetchLatestTerraformVersion fetches the latest active Terraform version.
 func FetchLatestTerraformVersion(ctx context.Context) (string, error) {
-	return fetchEndOfLifeLatest(ctx, "https://endoflife.date/api/terraform.json", "Terraform",
+	return fetchEndOfLifeLatest(ctx, http.DefaultClient, "https://endoflife.date/api/terraform.json", "Terraform",
 		func(r eolRelease) bool { return isActiveEOL(r.EOL) },
 	)
 }
@@ -115,10 +115,10 @@ type eolRelease struct {
 // fetchEndOfLifeLatest queries the endoflife.date API and returns the latest
 // version of the first release that passes the filter function.
 func fetchEndOfLifeLatest(
-	ctx context.Context, apiURL, name string, filter func(r eolRelease) bool,
+	ctx context.Context, client *http.Client, apiURL, name string, filter func(r eolRelease) bool,
 ) (string, error) {
 	var releases []eolRelease
-	if err := fetchJSON(ctx, apiURL, &releases); err != nil {
+	if err := fetchJSON(ctx, client, apiURL, &releases); err != nil {
 		return "", fmt.Errorf("failed to fetch %s versions: %w", name, err)
 	}
 
@@ -138,7 +138,7 @@ func fetchEndOfLifeLatest(
 const maxResponseSize = 10 * 1024 * 1024 // 10 MB
 
 // fetchJSON performs an HTTP GET and decodes the JSON response into target.
-func fetchJSON(ctx context.Context, url string, target any) error {
+func fetchJSON(ctx context.Context, client *http.Client, url string, target any) error {
 	// Respect caller-provided context deadlines; only apply the default timeout
 	// when the context does not already have one.
 	if _, ok := ctx.Deadline(); !ok {
@@ -152,7 +152,7 @@ func fetchJSON(ctx context.Context, url string, target any) error {
 		return fmt.Errorf("failed to create request: %w", err)
 	}
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		return err
 	}

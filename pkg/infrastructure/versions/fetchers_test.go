@@ -3,9 +3,13 @@
 package versions
 
 import (
+	"context"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestIsLTSRelease(t *testing.T) {
@@ -156,5 +160,208 @@ func TestIsActiveEOL(t *testing.T) {
 
 		// then
 		assert.False(t, result)
+	})
+}
+
+func TestFetchLatestGoVersion(t *testing.T) {
+	t.Parallel()
+
+	t.Run("should return latest stable version when API responds with valid data", func(t *testing.T) {
+		t.Parallel()
+
+		// given
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`[{"version":"go1.23.1","stable":true},{"version":"go1.22.5","stable":true}]`))
+		}))
+		defer server.Close()
+
+		// when
+		var releases []goRelease
+		err := fetchJSON(context.Background(), server.Client(), server.URL, &releases)
+		require.NoError(t, err)
+
+		var version string
+		for _, release := range releases {
+			if release.Stable {
+				version = release.Version
+				break
+			}
+		}
+
+		// then
+		assert.Equal(t, "go1.23.1", version)
+	})
+
+	t.Run("should return error when no stable version exists", func(t *testing.T) {
+		t.Parallel()
+
+		// given
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`[{"version":"go1.24rc1","stable":false}]`))
+		}))
+		defer server.Close()
+
+		// when
+		var releases []goRelease
+		err := fetchJSON(context.Background(), server.Client(), server.URL, &releases)
+		require.NoError(t, err)
+
+		var found bool
+		for _, release := range releases {
+			if release.Stable {
+				found = true
+				break
+			}
+		}
+
+		// then
+		assert.False(t, found)
+	})
+}
+
+func TestFetchLatestNodeVersion(t *testing.T) {
+	t.Parallel()
+
+	t.Run("should return latest LTS version when API responds with valid data", func(t *testing.T) {
+		t.Parallel()
+
+		// given
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`[{"version":"v23.0.0","lts":false},{"version":"v22.11.0","lts":"Jod"}]`))
+		}))
+		defer server.Close()
+
+		// when
+		var releases []nodeRelease
+		err := fetchJSON(context.Background(), server.Client(), server.URL, &releases)
+		require.NoError(t, err)
+
+		var version string
+		for _, release := range releases {
+			if isLTSRelease(release) {
+				version = release.Version
+				break
+			}
+		}
+
+		// then
+		assert.Equal(t, "v22.11.0", version)
+	})
+}
+
+func TestFetchEndOfLifeLatest(t *testing.T) {
+	t.Parallel()
+
+	t.Run("should return latest version when filter matches a release", func(t *testing.T) {
+		t.Parallel()
+
+		// given
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`[
+				{"cycle":"3.12","latest":"3.12.4","eol":false,"lts":false},
+				{"cycle":"3.11","latest":"3.11.9","eol":"2027-10-24","lts":false}
+			]`))
+		}))
+		defer server.Close()
+
+		// when
+		version, err := fetchEndOfLifeLatest(
+			context.Background(), server.Client(), server.URL, "Python",
+			func(r eolRelease) bool { return isActiveEOL(r.EOL) },
+		)
+
+		// then
+		require.NoError(t, err)
+		assert.Equal(t, "3.12.4", version)
+	})
+
+	t.Run("should return latest LTS Java version when filter matches", func(t *testing.T) {
+		t.Parallel()
+
+		// given
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`[
+				{"cycle":"23","latest":"23.0.1","eol":false,"lts":false},
+				{"cycle":"21","latest":"21.0.4","eol":false,"lts":true},
+				{"cycle":"17","latest":"17.0.12","eol":"2029-10-01","lts":true}
+			]`))
+		}))
+		defer server.Close()
+
+		// when
+		version, err := fetchEndOfLifeLatest(
+			context.Background(), server.Client(), server.URL, "Java",
+			func(r eolRelease) bool { return r.LTS && isActiveEOL(r.EOL) },
+		)
+
+		// then
+		require.NoError(t, err)
+		assert.Equal(t, "21.0.4", version)
+	})
+
+	t.Run("should return error when no release matches the filter", func(t *testing.T) {
+		t.Parallel()
+
+		// given
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`[{"cycle":"2.0","latest":"2.0.1","eol":true,"lts":false}]`))
+		}))
+		defer server.Close()
+
+		// when
+		_, err := fetchEndOfLifeLatest(
+			context.Background(), server.Client(), server.URL, "Terraform",
+			func(r eolRelease) bool { return isActiveEOL(r.EOL) },
+		)
+
+		// then
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "no active Terraform release found")
+	})
+
+	t.Run("should return error when server responds with non-200 status", func(t *testing.T) {
+		t.Parallel()
+
+		// given
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.WriteHeader(http.StatusNotFound)
+		}))
+		defer server.Close()
+
+		// when
+		_, err := fetchEndOfLifeLatest(
+			context.Background(), server.Client(), server.URL, "Java",
+			func(r eolRelease) bool { return r.LTS && isActiveEOL(r.EOL) },
+		)
+
+		// then
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "unexpected status code: 404")
+	})
+
+	t.Run("should return error when server responds with invalid JSON", func(t *testing.T) {
+		t.Parallel()
+
+		// given
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`not json`))
+		}))
+		defer server.Close()
+
+		// when
+		_, err := fetchEndOfLifeLatest(
+			context.Background(), server.Client(), server.URL, "Java",
+			func(r eolRelease) bool { return r.LTS && isActiveEOL(r.EOL) },
+		)
+
+		// then
+		require.Error(t, err)
 	})
 }
