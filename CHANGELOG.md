@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- fixed `FetchLatestJavaVersion` returning 404 by switching from the non-existent `endoflife.date/api/java.json` endpoint to `amazon-corretto.json`
+- fixed `FetchLatestJavaVersion` returning 404 by switching from the non-existent `/api/java.json` endpoint to `/api/amazon-corretto.json` on endoflife.date
 
 ## [0.3.1] - 2026-03-14
 
