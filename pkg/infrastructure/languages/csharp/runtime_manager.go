@@ -38,7 +38,10 @@ func (m *RuntimeManager) InstallCommand(version string) string {
 func (m *RuntimeManager) CurrentVersion() (string, error) {
 	output, err := m.runner.RunOutput(".", "dotnet", "--version")
 	if err != nil {
-		return "", nil
+		if cmdexec.IsBinaryNotFound(err) {
+			return "", nil
+		}
+		return "", err
 	}
 	version := strings.TrimSpace(output)
 	if version == "" {

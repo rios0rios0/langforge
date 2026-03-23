@@ -2,6 +2,18 @@ package golang
 
 import "github.com/rios0rios0/langforge/pkg/support/cmdexec"
 
+func goLintSpecs() []cmdexec.CommandSpec {
+	return []cmdexec.CommandSpec{
+		{Name: "golangci-lint", Args: []string{"run", "./..."}},
+	}
+}
+
+func goBuildSpecs() []cmdexec.CommandSpec {
+	return []cmdexec.CommandSpec{
+		{Name: "go", Args: []string{"build", "./..."}},
+	}
+}
+
 // BuildValidator runs lint and build checks for Go projects.
 type BuildValidator struct {
 	runner cmdexec.Runner
@@ -14,18 +26,20 @@ func NewBuildValidator(runner cmdexec.Runner) *BuildValidator {
 
 // LintCommands returns the Go lint commands.
 func (v *BuildValidator) LintCommands() []string {
-	return []string{"golangci-lint run ./..."}
+	return cmdexec.CommandStrings(goLintSpecs())
 }
 
 // BuildCommands returns the Go build commands.
 func (v *BuildValidator) BuildCommands() []string {
-	return []string{"go build ./..."}
+	return cmdexec.CommandStrings(goBuildSpecs())
 }
 
 // Validate runs lint and build commands in the given repo path.
 func (v *BuildValidator) Validate(repoPath string) error {
-	if err := v.runner.Run(repoPath, "golangci-lint", "run", "./..."); err != nil {
-		return err
+	for _, cmd := range append(goLintSpecs(), goBuildSpecs()...) {
+		if err := v.runner.Run(repoPath, cmd.Name, cmd.Args...); err != nil {
+			return err
+		}
 	}
-	return v.runner.Run(repoPath, "go", "build", "./...")
+	return nil
 }

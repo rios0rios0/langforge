@@ -7,6 +7,8 @@ import (
 	"github.com/rios0rios0/langforge/pkg/support/cmdexec"
 )
 
+const minVersionMatchGroups = 2
+
 // RuntimeManager provides SDK and runtime information for Python projects.
 type RuntimeManager struct {
 	runner cmdexec.Runner
@@ -38,11 +40,14 @@ func (m *RuntimeManager) InstallCommand(version string) string {
 func (m *RuntimeManager) CurrentVersion() (string, error) {
 	output, err := m.runner.RunOutput(".", "python3", "--version")
 	if err != nil {
-		return "", nil
+		if cmdexec.IsBinaryNotFound(err) {
+			return "", nil
+		}
+		return "", err
 	}
 	re := regexp.MustCompile(`Python\s+(\d+\.\d+(?:\.\d+)?)`)
 	matches := re.FindStringSubmatch(output)
-	if len(matches) < 2 {
+	if len(matches) < minVersionMatchGroups {
 		return "", nil
 	}
 	return matches[1], nil

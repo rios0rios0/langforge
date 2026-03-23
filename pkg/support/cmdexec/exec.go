@@ -3,6 +3,7 @@ package cmdexec
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"os/exec"
 	"strings"
@@ -48,4 +49,29 @@ func (r *DefaultRunner) RunOutput(dir string, name string, args ...string) (stri
 		return "", fmt.Errorf("command %q failed: %w\nstderr: %s", name, err, stderr.String())
 	}
 	return strings.TrimSpace(stdout.String()), nil
+}
+
+// IsBinaryNotFound reports whether the error indicates a missing executable.
+func IsBinaryNotFound(err error) bool {
+	return errors.Is(err, exec.ErrNotFound)
+}
+
+// CommandSpec defines a command with its name and arguments.
+type CommandSpec struct {
+	Name string
+	Args []string
+}
+
+// String returns the command as a single displayable string.
+func (c CommandSpec) String() string {
+	return strings.Join(append([]string{c.Name}, c.Args...), " ")
+}
+
+// CommandStrings converts a slice of CommandSpec to displayable strings.
+func CommandStrings(specs []CommandSpec) []string {
+	out := make([]string, len(specs))
+	for i, s := range specs {
+		out[i] = s.String()
+	}
+	return out
 }
