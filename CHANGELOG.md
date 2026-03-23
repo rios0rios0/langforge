@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- added `RuntimeManager` interface for SDK/runtime detection and installation commands
+- added `LanguageProviderFull` composite interface combining validation and runtime management
+- added `BuildValidator` implementations for all languages (Go, Node, Python, Java/Gradle, Java/Maven, C#, Terraform)
+- added `RuntimeManager` implementations for all languages with version detection and manager commands
+- added `RunOutput` method to `cmdexec.Runner` interface for capturing command stdout
+
 ## [0.4.0] - 2026-03-17
 
 ### Added

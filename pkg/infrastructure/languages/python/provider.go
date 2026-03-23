@@ -11,16 +11,21 @@ type Provider struct {
 	*VersionWriter
 	*DependencyReader
 	*DependencyUpdater
+	*BuildValidator
+	*RuntimeManager
 }
 
 // NewProvider creates a new Python language provider.
 func NewProvider() *Provider {
+	runner := cmdexec.NewDefaultRunner()
 	return &Provider{
 		Detector:          &Detector{},
 		VersionReader:     &VersionReader{},
 		VersionWriter:     &VersionWriter{},
 		DependencyReader:  &DependencyReader{},
-		DependencyUpdater: NewDependencyUpdater(cmdexec.NewDefaultRunner()),
+		DependencyUpdater: NewDependencyUpdater(runner),
+		BuildValidator:    NewBuildValidator(runner),
+		RuntimeManager:    NewRuntimeManager(runner),
 	}
 }
 
