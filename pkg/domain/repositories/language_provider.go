@@ -20,6 +20,12 @@ type LanguageProviderWithValidation interface {
 	BuildValidator
 }
 
+// LanguageProviderFull is a LanguageProvider with build validation and runtime management.
+type LanguageProviderFull interface {
+	LanguageProviderWithValidation
+	RuntimeManager
+}
+
 // LanguageInfo returns basic info about a language provider.
 type LanguageInfo interface {
 	// Language returns the canonical Language entity.
