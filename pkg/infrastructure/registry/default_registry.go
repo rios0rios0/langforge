@@ -7,6 +7,7 @@ import (
 	"github.com/rios0rios0/langforge/pkg/infrastructure/languages/javamaven"
 	"github.com/rios0rios0/langforge/pkg/infrastructure/languages/node"
 	"github.com/rios0rios0/langforge/pkg/infrastructure/languages/python"
+	"github.com/rios0rios0/langforge/pkg/infrastructure/languages/ruby"
 	"github.com/rios0rios0/langforge/pkg/infrastructure/languages/terraform"
 )
 
@@ -19,6 +20,7 @@ func NewDefaultRegistry() *LanguageRegistry {
 	r.Register(javagradle.NewProvider())
 	r.Register(javamaven.NewProvider())
 	r.Register(csharp.NewProvider())
+	r.Register(ruby.NewProvider())
 	r.Register(terraform.NewProvider())
 	return r
 }
