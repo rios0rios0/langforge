@@ -25,20 +25,20 @@ func (r *VersionReader) VersionFiles() []string {
 
 // ReadVersion reads the version from .gemspec or VERSION file.
 func (r *VersionReader) ReadVersion(repoPath string) (entities.Version, error) {
-	version, lastReadErr, err := readVersionFromGemspecs(repoPath)
+	version, found, lastReadErr, err := readVersionFromGemspecs(repoPath)
 	if err != nil {
 		return entities.Version{}, err
 	}
-	if version != nil {
-		return *version, nil
+	if found {
+		return version, nil
 	}
 
-	v, err := readVersionFromFile(repoPath)
+	version, found, err = readVersionFromFile(repoPath)
 	if err != nil {
 		return entities.Version{}, err
 	}
-	if v != nil {
-		return *v, nil
+	if found {
+		return version, nil
 	}
 
 	if lastReadErr != nil {
@@ -47,10 +47,10 @@ func (r *VersionReader) ReadVersion(repoPath string) (entities.Version, error) {
 	return entities.Version{}, errors.New("no version found in .gemspec or VERSION file")
 }
 
-func readVersionFromGemspecs(repoPath string) (*entities.Version, error, error) {
+func readVersionFromGemspecs(repoPath string) (entities.Version, bool, error, error) {
 	entries, err := os.ReadDir(repoPath)
 	if err != nil {
-		return nil, nil, fmt.Errorf("reading directory %q: %w", repoPath, err)
+		return entities.Version{}, false, nil, fmt.Errorf("reading directory %q: %w", repoPath, err)
 	}
 
 	var lastReadErr error
@@ -63,45 +63,45 @@ func readVersionFromGemspecs(repoPath string) (*entities.Version, error, error) 
 			lastReadErr = fmt.Errorf("reading %s: %w", entry.Name(), readErr)
 			continue
 		}
-		if v := extractGemspecVersion(content); v != nil {
-			return v, nil, nil
+		if v, ok := extractGemspecVersion(content); ok {
+			return v, true, nil, nil
 		}
 	}
-	return nil, lastReadErr, nil
+	return entities.Version{}, false, lastReadErr, nil
 }
 
-func extractGemspecVersion(content string) *entities.Version {
+func extractGemspecVersion(content string) (entities.Version, bool) {
 	scanner := bufio.NewScanner(strings.NewReader(content))
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
 		if m := gemspecVersionRe.FindStringSubmatch(line); m != nil {
 			v, err := entities.NewVersion(m[1])
 			if err == nil {
-				return &v
+				return v, true
 			}
 		}
 	}
-	return nil
+	return entities.Version{}, false
 }
 
-func readVersionFromFile(repoPath string) (*entities.Version, error) {
+func readVersionFromFile(repoPath string) (entities.Version, bool, error) {
 	versionFile := filepath.Join(repoPath, "VERSION")
 	if !fileutil.Exists(versionFile) {
-		return nil, nil
+		return entities.Version{}, false, nil
 	}
 	content, err := fileutil.ReadFile(versionFile)
 	if err != nil {
-		return nil, fmt.Errorf("reading VERSION file: %w", err)
+		return entities.Version{}, false, fmt.Errorf("reading VERSION file: %w", err)
 	}
 	raw := strings.TrimSpace(content)
 	if raw == "" {
-		return nil, nil
+		return entities.Version{}, false, nil
 	}
 	v, err := entities.NewVersion(raw)
 	if err != nil {
-		return nil, err
+		return entities.Version{}, false, err
 	}
-	return &v, nil
+	return v, true, nil
 }
 
 // findGemspecFile returns the first .gemspec file found in the given directory.
