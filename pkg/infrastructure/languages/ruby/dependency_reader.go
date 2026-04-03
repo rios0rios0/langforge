@@ -13,6 +13,8 @@ import (
 	"github.com/rios0rios0/langforge/pkg/support/fileutil"
 )
 
+const minDepMatchGroups = 3
+
 var gemDeclRe = regexp.MustCompile(`^\s*gem\s+["']([^"']+)["'](?:\s*,\s*["']([^"']+)["'])?`)
 
 // DependencyReader reads dependencies from Gemfile or .gemspec.
@@ -51,7 +53,7 @@ func readGemfile(path string) ([]entities.Dependency, error) {
 		if m := gemDeclRe.FindStringSubmatch(line); m != nil {
 			name := m[1]
 			version := ""
-			if len(m) > 2 {
+			if len(m) >= minDepMatchGroups {
 				version = m[2]
 			}
 			deps = append(deps, entities.NewDependency(name, version, "", "Gemfile"))
@@ -78,7 +80,7 @@ func readGemspec(path string) ([]entities.Dependency, error) {
 		if m := addDepRe.FindStringSubmatch(line); m != nil {
 			name := m[1]
 			version := ""
-			if len(m) > 2 {
+			if len(m) >= minDepMatchGroups {
 				version = m[2]
 			}
 			deps = append(deps, entities.NewDependency(name, version, "", filepath.Base(path)))
