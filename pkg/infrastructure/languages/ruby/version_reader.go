@@ -27,19 +27,23 @@ func (r *VersionReader) VersionFiles() []string {
 func (r *VersionReader) ReadVersion(repoPath string) (entities.Version, error) {
 	// Try .gemspec files first
 	entries, err := os.ReadDir(repoPath)
-	if err == nil {
-		for _, entry := range entries {
-			if strings.HasSuffix(entry.Name(), ".gemspec") && !entry.IsDir() {
-				content, readErr := fileutil.ReadFile(filepath.Join(repoPath, entry.Name()))
-				if readErr != nil {
-					continue
-				}
-				scanner := bufio.NewScanner(strings.NewReader(content))
-				for scanner.Scan() {
-					line := strings.TrimSpace(scanner.Text())
-					if m := gemspecVersionRe.FindStringSubmatch(line); m != nil {
-						return entities.NewVersion(m[1])
-					}
+	if err != nil {
+		return entities.Version{}, fmt.Errorf("reading directory %q: %w", repoPath, err)
+	}
+
+	var lastReadErr error
+	for _, entry := range entries {
+		if strings.HasSuffix(entry.Name(), ".gemspec") && !entry.IsDir() {
+			content, readErr := fileutil.ReadFile(filepath.Join(repoPath, entry.Name()))
+			if readErr != nil {
+				lastReadErr = fmt.Errorf("reading %s: %w", entry.Name(), readErr)
+				continue
+			}
+			scanner := bufio.NewScanner(strings.NewReader(content))
+			for scanner.Scan() {
+				line := strings.TrimSpace(scanner.Text())
+				if m := gemspecVersionRe.FindStringSubmatch(line); m != nil {
+					return entities.NewVersion(m[1])
 				}
 			}
 		}
@@ -49,14 +53,18 @@ func (r *VersionReader) ReadVersion(repoPath string) (entities.Version, error) {
 	versionFile := filepath.Join(repoPath, "VERSION")
 	if fileutil.Exists(versionFile) {
 		content, readErr := fileutil.ReadFile(versionFile)
-		if readErr == nil {
-			version := strings.TrimSpace(content)
-			if version != "" {
-				return entities.NewVersion(version)
-			}
+		if readErr != nil {
+			return entities.Version{}, fmt.Errorf("reading VERSION file: %w", readErr)
+		}
+		version := strings.TrimSpace(content)
+		if version != "" {
+			return entities.NewVersion(version)
 		}
 	}
 
+	if lastReadErr != nil {
+		return entities.Version{}, fmt.Errorf("no version found: %w", lastReadErr)
+	}
 	return entities.Version{}, errors.New("no version found in .gemspec or VERSION file")
 }
 
