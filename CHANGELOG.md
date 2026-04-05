@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-04-05
+
 ### Added
 
 - added Ruby language provider with detection (`Gemfile`, `*.gemspec`), version reading/writing (`.gemspec` and `VERSION` file), dependency reading, `bundle update` integration, `BuildValidator`, and `RuntimeManager`
@@ -15,11 +17,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- added `RuntimeManager` interface for SDK/runtime detection and installation commands
-- added `LanguageProviderFull` composite interface combining validation and runtime management
 - added `BuildValidator` implementations for all languages (Go, Node, Python, Java/Gradle, Java/Maven, C#, Terraform)
-- added `RuntimeManager` implementations for all languages with version detection and manager commands
+- added `LanguageProviderFull` composite interface combining validation and runtime management
 - added `RunOutput` method to `cmdexec.Runner` interface for capturing command stdout
+- added `RuntimeManager` implementations for all languages with version detection and manager commands
+- added `RuntimeManager` interface for SDK/runtime detection and installation commands
 
 ## [0.4.0] - 2026-03-17
 
@@ -68,8 +70,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - added `*.hcl` to Terraform detector's detection files
-- added `DetectWithChecker` and `DetectAllWithChecker` methods to `LanguageRegistry` for remote-compatible detection
 - added `DetectWith` standalone function that runs detection against any `FileChecker`
+- added `DetectWithChecker` and `DetectAllWithChecker` methods to `LanguageRegistry` for remote-compatible detection
 - added `FileChecker` function type to enable pluggable file existence checks (local filesystem or remote API)
 - added `LanguageJava` and `LanguageYAML` constants to `Language` type
 - added `LanguageRegistry` with auto-detection logic
