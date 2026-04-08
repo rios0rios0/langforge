@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- changed the Go version to `1.26.2` and updated all module dependencies
+
 ### Added
 
 - added Ruby language provider with detection (`Gemfile`, `*.gemspec`), version reading/writing (`.gemspec` and `VERSION` file), dependency reading, `bundle update` integration, `BuildValidator`, and `RuntimeManager`
