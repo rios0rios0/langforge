@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- refreshed `CLAUDE.md` and `.github/copilot-instructions.md` to document Ruby provider, `BuildValidator`/`RuntimeManager` interfaces, `LanguageProviderFull` composite, `versions/` package, and corrected package names (`javagradle`/`javamaven`, `cmdexec`)
+
 ## [0.6.2] - 2026-04-16
 
 ### Changed
