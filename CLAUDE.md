@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-`langforge` is a shared Go library (module `github.com/rios0rios0/langforge`) that provides language detection, version management, and dependency abstractions for 9 ecosystems: Go, Node/TypeScript, Python, Java Gradle, Java Maven, C#, Terraform, Dockerfile, and Pipeline/CI. It is consumed by tools like `autobump` and `autoupdate`. This is a library — there is no CLI or `main` package.
+`langforge` is a shared Go library (module `github.com/rios0rios0/langforge`) that provides language detection, version management, and dependency abstractions for 10 ecosystems: Go, Node/TypeScript, Python, Java Gradle, Java Maven, C#, Ruby, Terraform, Dockerfile, and Pipeline/CI. It is consumed by tools like `autobump` and `autoupdate`. This is a library — there is no CLI or `main` package.
 
 ## Commands
 
@@ -26,16 +26,17 @@ Prefer `make lint` / `make test` / `make sast` for CI-equivalent validation. Dir
 Hexagonal Architecture (Ports & Adapters) with DDD:
 
 - **`pkg/domain/entities/`** — Value objects: `Language` (enum), `Version` (semver wrapper), `Dependency`, `FileChecker` (pluggable file existence), `Classifier` (extension-based)
-- **`pkg/domain/repositories/`** — Interface contracts (ports): `LanguageDetector`, `VersionReader`, `VersionWriter`, `DependencyReader`, `DependencyUpdater`, `BuildValidator`. The composite `LanguageProvider` combines the first five.
-- **`pkg/infrastructure/languages/<ecosystem>/`** — One package per ecosystem implementing the domain interfaces. Each has: `detector.go`, `version_reader.go`, `version_writer.go`, `dependency_reader.go`, `dependency_updater.go`, `provider.go`. Dockerfile and Pipeline packages implement only `Detector`.
+- **`pkg/domain/repositories/`** — Interface contracts (ports): `LanguageDetector`, `VersionReader`, `VersionWriter`, `DependencyReader`, `DependencyUpdater`, `BuildValidator`, `RuntimeManager`. Composite interfaces: `LanguageProvider` (first five), `LanguageProviderWithValidation` (adds `BuildValidator`), `LanguageProviderFull` (adds `RuntimeManager`).
+- **`pkg/infrastructure/languages/<ecosystem>/`** — One package per ecosystem implementing the domain interfaces. Full providers have: `detector.go`, `version_reader.go`, `version_writer.go`, `dependency_reader.go`, `dependency_updater.go`, `build_validator.go`, `runtime_manager.go`, `provider.go`. Dockerfile and Pipeline packages implement only `Detector`.
 - **`pkg/infrastructure/registry/`** — `LanguageRegistry` maps `Language` → `LanguageProvider`; `NewDefaultRegistry()` wires all built-in providers.
+- **`pkg/infrastructure/versions/`** — Version fetchers for retrieving latest stable versions from public APIs (endoflife.date, etc.).
 - **`pkg/support/`** — Cross-cutting utilities: `cmdexec/` (shell command runner), `fileutil/` (file I/O helpers, `LocalFileChecker`).
 - **`test/builders/`** — Builder pattern for test data (`VersionBuilder`, `DependencyBuilder`, `LanguageProviderStubBuilder`).
 - **`test/doubles/`** — Test doubles (stubs) implementing domain interfaces.
 
 ### Provider pattern
 
-Each language `Provider` uses embedded struct composition to satisfy `LanguageProvider`:
+Each language `Provider` uses embedded struct composition to satisfy `LanguageProvider` (or `LanguageProviderFull` for providers with validation and runtime management):
 
 ```go
 type Provider struct {
@@ -44,6 +45,8 @@ type Provider struct {
     *VersionWriter
     *DependencyReader
     *DependencyUpdater
+    *BuildValidator    // optional — implements LanguageProviderWithValidation
+    *RuntimeManager    // optional — implements LanguageProviderFull
 }
 ```
 
@@ -52,7 +55,7 @@ The Go language implementation uses package name `golang` (not `go`) to avoid th
 ## Adding a new language provider
 
 1. Create package under `pkg/infrastructure/languages/<name>/`
-2. Implement `Detector`, `VersionReader`, `VersionWriter`, `DependencyReader`, `DependencyUpdater` (or a subset for detection-only providers)
+2. Implement `Detector`, `VersionReader`, `VersionWriter`, `DependencyReader`, `DependencyUpdater`, and optionally `BuildValidator` and `RuntimeManager` (or a subset for detection-only providers)
 3. Create `Provider` struct with embedded composition and a `NewProvider()` constructor
 4. Add a `Language` constant in `pkg/domain/entities/language.go`
 5. Register in `pkg/infrastructure/registry/default_registry.go`

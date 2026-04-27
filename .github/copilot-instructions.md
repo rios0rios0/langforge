@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-`langforge` is a shared Go library that provides language detection and ecosystem abstractions for Go, Java (Gradle and Maven), Python, Node.js (TypeScript/JavaScript), C#, and Terraform. It exposes interfaces and implementations for:
+`langforge` is a shared Go library that provides language detection and ecosystem abstractions for Go, Node/TypeScript, Python, Java (Gradle and Maven), C#, Ruby, Terraform, Dockerfile, and Pipeline/CI. It exposes interfaces and implementations for:
 
 - Detecting which language/ecosystem a repository uses
 - Reading and writing a project's canonical version
@@ -17,22 +17,27 @@ The project follows **hexagonal architecture** (ports and adapters):
 ```
 pkg/
   domain/
-    entities/           # Value objects: Language, Version, Dependency
+    entities/           # Value objects: Language, Version, Dependency, FileChecker, Classifier
     repositories/       # Interfaces (ports): LanguageDetector, VersionReader, VersionWriter,
-                        #   DependencyReader, DependencyUpdater, BuildValidator, LanguageProvider
+                        #   DependencyReader, DependencyUpdater, BuildValidator, RuntimeManager
+                        #   Composites: LanguageProvider, LanguageProviderWithValidation, LanguageProviderFull
   infrastructure/
     languages/          # Implementations (adapters) per language
       golang/           # Go language provider (package name: golang, not go)
       node/
       python/
-      java_gradle/
-      java_maven/
+      javagradle/
+      javamaven/
       csharp/
+      ruby/
       terraform/
+      dockerfile/       # Detection only
+      pipeline/         # Detection only
     registry/           # LanguageRegistry: maps Language → LanguageProvider
+    versions/           # Version fetchers for latest stable versions from public APIs
   support/
-    exec/               # Shell command runner abstraction
-    fileutil/           # File read/write helpers
+    cmdexec/            # Shell command runner abstraction
+    fileutil/           # File read/write helpers, LocalFileChecker
 test/
   builders/             # Test builder pattern for domain entities and stubs
   doubles/              # Test doubles (stubs/fakes) for interfaces
@@ -49,8 +54,10 @@ All language providers satisfy the composite `LanguageProvider` interface define
 | `VersionWriter`     | `WriteVersion(repoPath, version) error`, `FilesChanged(repoPath) ([]string, error)` |
 | `DependencyReader`  | `ReadDependencies(repoPath) ([]Dependency, error)`      |
 | `DependencyUpdater` | `UpdateAll(repoPath) error`, `FilesChanged(repoPath) ([]string, error)`, `Commands() []string` |
+| `BuildValidator`    | `Validate(repoPath) error`, `LintCommands() []string`, `BuildCommands() []string` |
+| `RuntimeManager`    | `SDKName() string`, `VersionManager() string`, `InstallCommand(version) string`, `CurrentVersion() (string, error)` |
 
-Optionally, a provider may also implement `BuildValidator` (`Validate`, `LintCommands`, `BuildCommands`) via `LanguageProviderWithValidation`.
+Composite interfaces: `LanguageProvider` (first five), `LanguageProviderWithValidation` (adds `BuildValidator`), `LanguageProviderFull` (adds `RuntimeManager`).
 
 ## Adding a New Language Provider
 
@@ -61,9 +68,11 @@ Optionally, a provider may also implement `BuildValidator` (`Validate`, `LintCom
    - `version_writer.go` — implements `VersionWriter`
    - `dependency_reader.go` — implements `DependencyReader`
    - `dependency_updater.go` — implements `DependencyUpdater`
+   - `build_validator.go` — implements `BuildValidator` (optional)
+   - `runtime_manager.go` — implements `RuntimeManager` (optional)
    - `provider.go` — `Provider` struct embedding all of the above via pointer composition
 3. Register a new `Language` constant in `pkg/domain/entities/language.go`.
-4. Wire up the provider in the registry or the consuming application.
+4. Register the provider in `pkg/infrastructure/registry/default_registry.go`.
 
 ### Provider Struct Convention
 
@@ -76,22 +85,27 @@ type Provider struct {
     *VersionWriter
     *DependencyReader
     *DependencyUpdater
+    *BuildValidator    // optional
+    *RuntimeManager    // optional
 }
 
 func NewProvider() *Provider {
+    runner := cmdexec.NewDefaultRunner()
     return &Provider{
         Detector:          &Detector{},
         VersionReader:     &VersionReader{},
         VersionWriter:     &VersionWriter{},
         DependencyReader:  &DependencyReader{},
-        DependencyUpdater: NewDependencyUpdater(exec.NewDefaultRunner()),
+        DependencyUpdater: NewDependencyUpdater(runner),
+        BuildValidator:    NewBuildValidator(runner),
+        RuntimeManager:    NewRuntimeManager(runner),
     }
 }
 ```
 
 ### Package Naming
 
-- Use the ecosystem/tool name as the Go package name (e.g., `java_gradle`, `python`, `node`, `terraform`).
+- Use the ecosystem/tool name as the Go package name (e.g., `javagradle`, `python`, `node`, `terraform`).
 - The Go language implementation uses the package name `golang` (not `go`) to avoid a keyword conflict.
 
 ## Domain Entities
@@ -114,19 +128,25 @@ A plain struct with `Name`, `Current`, `Latest`, and `SourceFile` fields:
 
 ## Testing Patterns
 
-- Tests live alongside the source file they test (e.g., `detector_test.go` next to `detector.go`).
+- Build tag: `//go:build unit` on all unit tests.
+- External test packages (e.g., `package golang_test`).
+- BDD structure with `// given`, `// when`, `// then` comment blocks.
+- Parallel execution: `t.Parallel()` at test function and sub-test level.
 - Use the **builder pattern** from `test/builders/` to construct test entities (`DependencyBuilder`, `VersionBuilder`, `LanguageProviderStubBuilder`).
 - Test doubles live in `test/doubles/`.
-- Use `github.com/stretchr/testify` for assertions.
+- Framework: `github.com/stretchr/testify` (assertions + suites) and `github.com/rios0rios0/testkit`.
 
 ## Build and Test Commands
 
 ```bash
-go build ./...        # build all packages
-go test ./...         # run all tests
-make lint             # run linters (golangci-lint via pipelines)
-make test             # run tests via Makefile
-make sast             # run static analysis / security scan
+make setup             # clone/update the pipelines repository (first time)
+make lint              # run golangci-lint via pipelines
+make test              # run all tests via pipelines
+make sast              # run full SAST suite (CodeQL, Semgrep, Trivy, Hadolint, Gitleaks)
+go build ./...                                               # build all packages
+go test -tags=unit ./...                                     # run all tests directly
+go test -tags=unit -v ./pkg/infrastructure/languages/golang  # run tests for a specific package
+go test -tags=unit -run TestGoVersionReader ./...             # run a single test by name
 ```
 
 The module path is `github.com/rios0rios0/langforge`.
