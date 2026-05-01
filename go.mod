@@ -3,7 +3,7 @@ module github.com/rios0rios0/langforge
 go 1.26.2
 
 require (
-	github.com/Masterminds/semver/v3 v3.4.0
+	github.com/Masterminds/semver/v3 v3.5.0
 	github.com/rios0rios0/testkit v0.2.0
 	github.com/stretchr/testify v1.11.1
 )
