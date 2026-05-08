@@ -19,7 +19,7 @@ type VersionReader struct{}
 
 // VersionFiles returns the files inspected for the version.
 func (r *VersionReader) VersionFiles() []string {
-	return []string{"build.gradle", "build.gradle.kts"}
+	return []string{buildGradleFilename, buildGradleKtsFilename}
 }
 
 // ReadVersion reads the version from build.gradle or build.gradle.kts.

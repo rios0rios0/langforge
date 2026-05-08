@@ -26,7 +26,7 @@ func (u *DependencyUpdater) Commands() []string {
 // FilesChanged returns the files modified by an update.
 func (u *DependencyUpdater) FilesChanged(repoPath string) ([]string, error) {
 	return []string{
-		filepath.Join(repoPath, "build.gradle"),
+		filepath.Join(repoPath, buildGradleFilename),
 	}, nil
 }
 

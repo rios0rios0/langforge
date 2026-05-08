@@ -11,7 +11,7 @@ type Detector struct{}
 
 // DetectionFiles returns the files that identify a Gradle project.
 func (d *Detector) DetectionFiles() []string {
-	return []string{"build.gradle", "build.gradle.kts", "settings.gradle", "settings.gradle.kts"}
+	return []string{buildGradleFilename, buildGradleKtsFilename, "settings.gradle", "settings.gradle.kts"}
 }
 
 // Detect returns true if any Gradle marker file exists in repoPath.

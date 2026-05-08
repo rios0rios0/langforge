@@ -19,7 +19,7 @@ type VersionWriter struct{}
 
 // FilesChanged returns the list of files that will be modified.
 func (w *VersionWriter) FilesChanged(repoPath string) ([]string, error) {
-	for _, filename := range []string{"build.gradle", "build.gradle.kts"} {
+	for _, filename := range []string{buildGradleFilename, buildGradleKtsFilename} {
 		path := filepath.Join(repoPath, filename)
 		if fileutil.Exists(path) {
 			return []string{path}, nil
@@ -30,7 +30,7 @@ func (w *VersionWriter) FilesChanged(repoPath string) ([]string, error) {
 
 // WriteVersion updates the version field in build.gradle.
 func (w *VersionWriter) WriteVersion(repoPath string, version entities.Version) error {
-	for _, filename := range []string{"build.gradle", "build.gradle.kts"} {
+	for _, filename := range []string{buildGradleFilename, buildGradleKtsFilename} {
 		path := filepath.Join(repoPath, filename)
 		if !fileutil.Exists(path) {
 			continue
