@@ -23,7 +23,7 @@ type DependencyReader struct{}
 func (r *DependencyReader) ReadDependencies(
 	repoPath string,
 ) ([]entities.Dependency, error) {
-	for _, filename := range []string{"build.gradle", "build.gradle.kts"} {
+	for _, filename := range []string{buildGradleFilename, buildGradleKtsFilename} {
 		path := filepath.Join(repoPath, filename)
 		if !fileutil.Exists(path) {
 			continue
