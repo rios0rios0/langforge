@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - changed the Go module dependencies to their latest versions
+- refreshed `.github/copilot-instructions.md` to add missing `StartCommand()` and `StopCommand()` methods to the `RuntimeManager` interface table
 
 ## [0.6.6] - 2026-05-08
 
