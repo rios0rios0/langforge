@@ -55,7 +55,7 @@ All language providers satisfy the composite `LanguageProvider` interface define
 | `DependencyReader`  | `ReadDependencies(repoPath) ([]Dependency, error)`      |
 | `DependencyUpdater` | `UpdateAll(repoPath) error`, `FilesChanged(repoPath) ([]string, error)`, `Commands() []string` |
 | `BuildValidator`    | `Validate(repoPath) error`, `LintCommands() []string`, `BuildCommands() []string` |
-| `RuntimeManager`    | `SDKName() string`, `VersionManager() string`, `InstallCommand(version) string`, `CurrentVersion() (string, error)` |
+| `RuntimeManager`    | `SDKName() string`, `VersionManager() string`, `InstallCommand(version) string`, `CurrentVersion() (string, error)`, `StartCommand() string`, `StopCommand() string` |
 
 Composite interfaces: `LanguageProvider` (first five), `LanguageProviderWithValidation` (adds `BuildValidator`), `LanguageProviderFull` (adds `RuntimeManager`).
 
