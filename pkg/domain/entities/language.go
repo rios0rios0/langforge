@@ -11,6 +11,7 @@ const (
 	LanguageJavaGradle Language = "java_gradle"
 	LanguageJavaMaven  Language = "java_maven"
 	LanguageRuby       Language = "ruby"
+	LanguageDart       Language = "dart"
 	LanguageCSharp     Language = "csharp"
 	LanguageTerraform  Language = "terraform"
 	LanguageYAML       Language = "yaml"

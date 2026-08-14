@@ -23,7 +23,9 @@ func TestPipelineDetector(t *testing.T) {
 		// given
 		dir := t.TempDir()
 		workflowDir := filepath.Join(dir, ".github", "workflows")
-		require.NoError(t, os.MkdirAll(workflowDir, 0o755))
+		// 0o700 is least-privilege for a directory: 0o600 drops the owner execute bit and breaks it.
+		// nosemgrep: go.lang.correctness.permissions.file_permission.incorrect-default-permission
+		require.NoError(t, os.MkdirAll(workflowDir, 0o700))
 		require.NoError(t, os.WriteFile(filepath.Join(workflowDir, "ci.yaml"), []byte("name: CI\n"), 0o600))
 		d := &pipeline.Detector{}
 
@@ -57,7 +59,9 @@ func TestPipelineDetector(t *testing.T) {
 		// given
 		dir := t.TempDir()
 		adoDir := filepath.Join(dir, "azure-devops", "templates")
-		require.NoError(t, os.MkdirAll(adoDir, 0o755))
+		// 0o700 is least-privilege for a directory: 0o600 drops the owner execute bit and breaks it.
+		// nosemgrep: go.lang.correctness.permissions.file_permission.incorrect-default-permission
+		require.NoError(t, os.MkdirAll(adoDir, 0o700))
 		require.NoError(t, os.WriteFile(filepath.Join(adoDir, "build.yaml"), []byte("steps:\n"), 0o600))
 		d := &pipeline.Detector{}
 

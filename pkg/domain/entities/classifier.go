@@ -14,6 +14,7 @@ var extensionToLanguage = map[string]Language{
 	".mjs":  LanguageNode,
 	".cjs":  LanguageNode,
 	".py":   LanguagePython,
+	".dart": LanguageDart,
 	".java": LanguageJava,
 	".cs":   LanguageCSharp,
 	".tf":   LanguageTerraform,
