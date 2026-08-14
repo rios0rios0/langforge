@@ -13,70 +13,58 @@ import (
 func TestBumpBuildNumber(t *testing.T) {
 	t.Parallel()
 
-	t.Run("should return the new version when there is no build number", func(t *testing.T) {
-		t.Parallel()
+	testCases := []struct {
+		name      string
+		current   string
+		newSemver string
+		expected  string
+	}{
+		{
+			name:      "should return the new version when there is no build number",
+			current:   "0.1.0",
+			newSemver: "0.2.0",
+			expected:  "0.2.0",
+		},
+		{
+			name:      "should increment the build number when one is present",
+			current:   "1.0.0+1",
+			newSemver: "1.1.0",
+			expected:  "1.1.0+2",
+		},
+		{
+			name:      "should preserve zero padding when incrementing the build number",
+			current:   "2.10.2+021002",
+			newSemver: "2.11.0",
+			expected:  "2.11.0+021003",
+		},
+		{
+			name:      "should widen the build number when the increment outgrows its padding",
+			current:   "1.0.0+99",
+			newSemver: "1.0.1",
+			expected:  "1.0.1+100",
+		},
+		{
+			name:      "should carry a non-numeric build suffix through unchanged",
+			current:   "1.0.0+nightly",
+			newSemver: "1.1.0",
+			expected:  "1.1.0+nightly",
+		},
+	}
 
-		// given
-		current := "0.1.0"
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
 
-		// when
-		result := dart.BumpBuildNumber(current, "0.2.0")
+			// given
+			current, newSemver := testCase.current, testCase.newSemver
 
-		// then
-		assert.Equal(t, "0.2.0", result)
-	})
+			// when
+			result := dart.BumpBuildNumber(current, newSemver)
 
-	t.Run("should increment the build number when one is present", func(t *testing.T) {
-		t.Parallel()
-
-		// given
-		current := "1.0.0+1"
-
-		// when
-		result := dart.BumpBuildNumber(current, "1.1.0")
-
-		// then
-		assert.Equal(t, "1.1.0+2", result)
-	})
-
-	t.Run("should preserve zero padding when incrementing the build number", func(t *testing.T) {
-		t.Parallel()
-
-		// given
-		current := "2.10.2+021002"
-
-		// when
-		result := dart.BumpBuildNumber(current, "2.11.0")
-
-		// then
-		assert.Equal(t, "2.11.0+021003", result)
-	})
-
-	t.Run("should widen the build number when the increment outgrows its padding", func(t *testing.T) {
-		t.Parallel()
-
-		// given
-		current := "1.0.0+99"
-
-		// when
-		result := dart.BumpBuildNumber(current, "1.0.1")
-
-		// then
-		assert.Equal(t, "1.0.1+100", result)
-	})
-
-	t.Run("should carry a non-numeric build suffix through unchanged", func(t *testing.T) {
-		t.Parallel()
-
-		// given
-		current := "1.0.0+nightly"
-
-		// when
-		result := dart.BumpBuildNumber(current, "1.1.0")
-
-		// then
-		assert.Equal(t, "1.1.0+nightly", result)
-	})
+			// then
+			assert.Equal(t, testCase.expected, result)
+		})
+	}
 }
 
 func TestReplaceVersion(t *testing.T) {
