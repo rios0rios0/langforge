@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// VersionLineRe matches the top-level "version:" entry of a pubspec.yaml.
+// pubspecVersionLineRe matches the top-level "version:" entry of a pubspec.yaml.
 //
 // The anchor is deliberate: it must sit at column 0 under (?m), because every
 // other version-shaped value in a pubspec is indented — the SDK constraint under
@@ -16,7 +16,7 @@ import (
 //
 // Group 1 is the "version:" key and its trailing spaces, group 2 is the value,
 // and group 3 is any trailing whitespace and comment, which callers preserve.
-var VersionLineRe = regexp.MustCompile(`(?m)^(version:[ \t]*)([^\s#]+)([ \t]*(?:#.*)?)$`)
+var pubspecVersionLineRe = regexp.MustCompile(`(?m)^(version:[ \t]*)([^\s#]+)([ \t]*(?:#.*)?)$`)
 
 // buildSuffixRe splits a pubspec version into its semantic part and its build
 // suffix. Dart writes the build number after a '+', which Flutter maps onto

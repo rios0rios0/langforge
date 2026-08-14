@@ -12,7 +12,7 @@ type Detector struct{}
 // DetectionFiles returns the files that identify a Dart project.
 // Flutter shares the same manifest, so a single marker covers both.
 func (d *Detector) DetectionFiles() []string {
-	return []string{"pubspec.yaml"}
+	return []string{Pubspec}
 }
 
 // Detect returns true if pubspec.yaml exists in repoPath.

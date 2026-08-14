@@ -37,7 +37,7 @@ func (r *VersionReader) ReadVersion(repoPath string) (entities.Version, error) {
 // the manifest declared one. The build suffix is preserved: semver treats it as
 // metadata, and Flutter treats it as the store build number.
 func ExtractVersion(content string) (string, bool) {
-	match := VersionLineRe.FindStringSubmatch(content)
+	match := pubspecVersionLineRe.FindStringSubmatch(content)
 	if match == nil {
 		return "", false
 	}

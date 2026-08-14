@@ -45,7 +45,7 @@ func (w *VersionWriter) WriteVersion(repoPath string, version entities.Version) 
 // carrying the existing build number forward, and reports whether a version
 // line was found. Only the first match is replaced.
 func ReplaceVersion(content, newSemver string) (string, bool) {
-	loc := VersionLineRe.FindStringSubmatchIndex(content)
+	loc := pubspecVersionLineRe.FindStringSubmatchIndex(content)
 	if loc == nil {
 		return content, false
 	}
