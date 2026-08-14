@@ -2,36 +2,20 @@ package javamaven
 
 import (
 	"github.com/rios0rios0/langforge/pkg/domain/repositories"
+	"github.com/rios0rios0/langforge/pkg/infrastructure/languages/java"
 	"github.com/rios0rios0/langforge/pkg/support/cmdexec"
 )
 
-// Provider is the composite Java/Maven language provider.
-type Provider struct {
-	*Detector
-	*VersionReader
-	*VersionWriter
-	*DependencyReader
-	*DependencyUpdater
-	*BuildValidator
-	*RuntimeManager
-}
-
 // NewProvider creates a new Java/Maven language provider.
-func NewProvider() *Provider {
+func NewProvider() *repositories.CompositeProvider {
 	runner := cmdexec.NewDefaultRunner()
-	return &Provider{
-		Detector:          &Detector{},
+	return &repositories.CompositeProvider{
+		LanguageDetector:  &Detector{},
 		VersionReader:     &VersionReader{},
 		VersionWriter:     &VersionWriter{},
 		DependencyReader:  &DependencyReader{},
 		DependencyUpdater: NewDependencyUpdater(runner),
 		BuildValidator:    NewBuildValidator(runner),
-		RuntimeManager:    NewRuntimeManager(runner),
+		RuntimeManager:    java.NewRuntimeManager(runner, "mvn spring-boot:run"),
 	}
-}
-
-// FilesChanged resolves the ambiguity between VersionWriter.FilesChanged and
-// DependencyUpdater.FilesChanged by merging both results.
-func (p *Provider) FilesChanged(repoPath string) ([]string, error) {
-	return repositories.MergeFilesChanged(p.VersionWriter, p.DependencyUpdater, repoPath)
 }

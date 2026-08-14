@@ -7,6 +7,10 @@ import (
 	"github.com/rios0rios0/langforge/pkg/support/cmdexec"
 )
 
+// pythonVersionRe matches the version in `python3 --version` output, which
+// reads `Python 3.12.1`.
+var pythonVersionRe = regexp.MustCompile(`Python\s+(\d+\.\d+(?:\.\d+)?)`)
+
 // RuntimeManager provides SDK and runtime information for Python projects.
 type RuntimeManager struct {
 	runner cmdexec.Runner
@@ -36,10 +40,5 @@ func (m *RuntimeManager) InstallCommand(version string) string {
 
 // CurrentVersion returns the currently installed Python version, or empty if not installed.
 func (m *RuntimeManager) CurrentVersion() (string, error) {
-	return cmdexec.CapturedVersion(
-		m.runner,
-		regexp.MustCompile(`Python\s+(\d+\.\d+(?:\.\d+)?)`),
-		"python3",
-		"--version",
-	)
+	return cmdexec.CapturedVersion(m.runner, pythonVersionRe, "python3", "--version")
 }

@@ -32,19 +32,39 @@ type LanguageInfo interface {
 	Language() entities.Language
 }
 
-// MergeFilesChanged returns the union of the files a VersionWriter and a
+// CompositeProvider assembles a LanguageProviderFull out of the parts a
+// language package implements. Every ecosystem composes the same seven ports in
+// the same way, so they share this one type instead of each declaring its own
+// identical struct.
+//
+// A language that implements only some of the ports still uses this type: the
+// unset fields stay nil and the composite satisfies the narrower interface
+// (LanguageProvider or LanguageProviderWithValidation) that its callers ask for.
+type CompositeProvider struct {
+	LanguageDetector
+	VersionReader
+	VersionWriter
+	DependencyReader
+	DependencyUpdater
+	BuildValidator
+	RuntimeManager
+}
+
+var _ LanguageProviderFull = (*CompositeProvider)(nil)
+
+// FilesChanged returns the union of the files the VersionWriter and the
 // DependencyUpdater each report, writer's first and without duplicates.
 //
-// Every composite provider embeds both, and both declare FilesChanged, so the
-// method is ambiguous on the embedded structs and each Provider has to define
-// it explicitly. This is that definition: providers delegate here instead of
-// each carrying its own copy of the merge.
-func MergeFilesChanged(writer VersionWriter, updater DependencyUpdater, repoPath string) ([]string, error) {
-	files, err := writer.FilesChanged(repoPath)
+// Both embedded ports declare FilesChanged, which makes the promoted method
+// ambiguous, so the composite has to resolve it explicitly. Merging is the
+// resolution every language wants: the caller asks which files an update
+// touches, and both halves of the answer matter.
+func (p *CompositeProvider) FilesChanged(repoPath string) ([]string, error) {
+	files, err := p.VersionWriter.FilesChanged(repoPath)
 	if err != nil {
 		return nil, err
 	}
-	updated, err := updater.FilesChanged(repoPath)
+	updated, err := p.DependencyUpdater.FilesChanged(repoPath)
 	if err != nil {
 		return nil, err
 	}

@@ -5,22 +5,11 @@ import (
 	"github.com/rios0rios0/langforge/pkg/support/cmdexec"
 )
 
-// Provider is the composite C# language provider.
-type Provider struct {
-	*Detector
-	*VersionReader
-	*VersionWriter
-	*DependencyReader
-	*DependencyUpdater
-	*BuildValidator
-	*RuntimeManager
-}
-
 // NewProvider creates a new C# language provider.
-func NewProvider() *Provider {
+func NewProvider() *repositories.CompositeProvider {
 	runner := cmdexec.NewDefaultRunner()
-	return &Provider{
-		Detector:          &Detector{},
+	return &repositories.CompositeProvider{
+		LanguageDetector:  &Detector{},
 		VersionReader:     &VersionReader{},
 		VersionWriter:     &VersionWriter{},
 		DependencyReader:  &DependencyReader{},
@@ -28,10 +17,4 @@ func NewProvider() *Provider {
 		BuildValidator:    NewBuildValidator(runner),
 		RuntimeManager:    NewRuntimeManager(runner),
 	}
-}
-
-// FilesChanged resolves the ambiguity between VersionWriter.FilesChanged and
-// DependencyUpdater.FilesChanged by merging both results.
-func (p *Provider) FilesChanged(repoPath string) ([]string, error) {
-	return repositories.MergeFilesChanged(p.VersionWriter, p.DependencyUpdater, repoPath)
 }
