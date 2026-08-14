@@ -33,6 +33,7 @@ A shared Go library providing language detection and ecosystem abstractions for 
 | Go              | `go.mod`                                         | `go.mod`         |
 | Node/TypeScript | `package.json`, `yarn.lock`, `pnpm-lock.yaml`    | `package.json`   |
 | Python          | `pyproject.toml`, `setup.py`, `requirements.txt` | `pyproject.toml` |
+| Dart/Flutter    | `pubspec.yaml`                                   | `pubspec.yaml`   |
 | Java (Gradle)   | `build.gradle`, `build.gradle.kts`               | `build.gradle`   |
 | Java (Maven)    | `pom.xml`                                        | `pom.xml`        |
 | C#              | `.csproj`, `.sln`                                | `.csproj`        |

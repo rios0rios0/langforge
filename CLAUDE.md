@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-`langforge` is a shared Go library (module `github.com/rios0rios0/langforge`) that provides language detection, version management, and dependency abstractions for 10 ecosystems: Go, Node/TypeScript, Python, Java Gradle, Java Maven, C#, Ruby, Terraform, Dockerfile, and Pipeline/CI. It is consumed by tools like `autobump` and `autoupdate`. This is a library — there is no CLI or `main` package.
+`langforge` is a shared Go library (module `github.com/rios0rios0/langforge`) that provides language detection, version management, and dependency abstractions for 11 ecosystems: Go, Node/TypeScript, Python, Dart/Flutter, Java Gradle, Java Maven, C#, Ruby, Terraform, Dockerfile, and Pipeline/CI. It is consumed by tools like `autobump` and `autoupdate`. This is a library — there is no CLI or `main` package.
 
 ## Commands
 
@@ -52,13 +52,15 @@ type Provider struct {
 
 The Go language implementation uses package name `golang` (not `go`) to avoid the keyword conflict.
 
+The `dart` package covers Flutter too — both declare the same `pubspec.yaml`, so they are one provider rather than two, and `dart.IsFlutter` is the single place that decides which toolchain (`dart` or `flutter`) a given repository is driven with.
+
 ## Adding a new language provider
 
 1. Create package under `pkg/infrastructure/languages/<name>/`
 2. Implement `Detector`, `VersionReader`, `VersionWriter`, `DependencyReader`, `DependencyUpdater`, and optionally `BuildValidator` and `RuntimeManager` (or a subset for detection-only providers)
 3. Create `Provider` struct with embedded composition and a `NewProvider()` constructor
 4. Add a `Language` constant in `pkg/domain/entities/language.go`
-5. Register in `pkg/infrastructure/registry/default_registry.go`
+5. Register in `pkg/infrastructure/registry/default_registry.go` — **order matters**: `Detect` returns the first provider that matches, so a provider whose marker file is unambiguous must be registered ahead of one whose marker is weak (this is why `dart` precedes `node`)
 
 ## Testing conventions
 
