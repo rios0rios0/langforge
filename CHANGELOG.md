@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- changed the Go version to `1.26.6` and updated all module dependencies
+
 ### Added
 
 - added a Dart provider covering Flutter as well, since both declare the same `pubspec.yaml`. `IsFlutter` is the single place that distinguishes them — from one manifest, `flutter pub` and `flutter analyze` are selected for a Flutter project and `dart pub`/`dart analyze` for a plain package, because resolving a Flutter project with the bare Dart toolchain cannot satisfy its SDK-sourced packages
