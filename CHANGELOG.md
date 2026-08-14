@@ -16,6 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - added a `java` package holding the JDK runtime manager that the Java/Gradle and Java/Maven providers share. The two ecosystems differ in their build tool, not in their SDK, its version manager, or the command that reports its version, so their runtime managers were identical apart from the command that starts an application — which is now the one thing each supplies
 - added `.dart` to the extension classifier and registered the provider **ahead of Node** in the default registry. Detection returns the first provider that matches, and a Flutter web project often keeps a `package.json` for its JavaScript tooling while nothing but Dart uses a `pubspec.yaml` — so the more specific marker has to be offered first, and a test pins that ordering
 
+### Removed
+
+- **BREAKING CHANGE:** removed the nine per-ecosystem `Provider` structs, which `repositories.CompositeProvider` replaces. `NewProvider()` still exists in every language package and now returns `*repositories.CompositeProvider`, so registering a provider is unchanged; only code that named a concrete type (`golang.Provider`, `dart.Provider`, …) has to change
+- **BREAKING CHANGE:** removed `javagradle.RuntimeManager` and `javamaven.RuntimeManager` along with their constructors, which the shared `java.RuntimeManager` replaces. Both providers report the same SDK as before
+
 ## [0.6.11] - 2026-07-14
 
 ### Changed
