@@ -7,7 +7,9 @@ import (
 	"github.com/rios0rios0/langforge/pkg/support/cmdexec"
 )
 
-const minVersionMatchGroups = 2
+// rubyVersionRe matches the version in `ruby --version` output, which reads
+// `ruby 3.3.0 (2023-12-25 revision 5124f9ac75) [x86_64-linux]`.
+var rubyVersionRe = regexp.MustCompile(`ruby\s+(\d+\.\d+(?:\.\d+)?)`)
 
 // RuntimeManager provides SDK and runtime information for Ruby projects.
 type RuntimeManager struct {
@@ -38,17 +40,5 @@ func (m *RuntimeManager) InstallCommand(version string) string {
 
 // CurrentVersion returns the currently installed Ruby version, or empty if not installed.
 func (m *RuntimeManager) CurrentVersion() (string, error) {
-	output, err := m.runner.RunOutput(".", "ruby", "--version")
-	if err != nil {
-		if cmdexec.IsBinaryNotFound(err) {
-			return "", nil
-		}
-		return "", err
-	}
-	re := regexp.MustCompile(`ruby\s+(\d+\.\d+(?:\.\d+)?)`)
-	matches := re.FindStringSubmatch(output)
-	if len(matches) < minVersionMatchGroups {
-		return "", nil
-	}
-	return matches[1], nil
+	return cmdexec.CapturedVersion(m.runner, rubyVersionRe, "ruby", "--version")
 }

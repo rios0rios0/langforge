@@ -36,21 +36,28 @@ Hexagonal Architecture (Ports & Adapters) with DDD:
 
 ### Provider pattern
 
-Each language `Provider` uses embedded struct composition to satisfy `LanguageProvider` (or `LanguageProviderFull` for providers with validation and runtime management):
+Every ecosystem composes the same seven ports the same way, so they share one composite type — `repositories.CompositeProvider` — instead of each declaring an identical struct. A language package supplies only its own parts:
 
 ```go
-type Provider struct {
-    *Detector
-    *VersionReader
-    *VersionWriter
-    *DependencyReader
-    *DependencyUpdater
-    *BuildValidator    // optional — implements LanguageProviderWithValidation
-    *RuntimeManager    // optional — implements LanguageProviderFull
+func NewProvider() *repositories.CompositeProvider {
+    runner := cmdexec.NewDefaultRunner()
+    return &repositories.CompositeProvider{
+        LanguageDetector:  &Detector{},
+        VersionReader:     &VersionReader{},
+        VersionWriter:     &VersionWriter{},
+        DependencyReader:  &DependencyReader{},
+        DependencyUpdater: NewDependencyUpdater(runner),
+        BuildValidator:    NewBuildValidator(runner),  // optional — implements LanguageProviderWithValidation
+        RuntimeManager:    NewRuntimeManager(runner),  // optional — implements LanguageProviderFull
+    }
 }
 ```
 
+Unset fields stay nil, and the composite still satisfies the narrower interface (`LanguageProvider` or `LanguageProviderWithValidation`) its callers ask for. `VersionWriter` and `DependencyUpdater` both declare `FilesChanged`, so the promoted method is ambiguous; `CompositeProvider.FilesChanged` resolves it by merging both results, written and tested once.
+
 The Go language implementation uses package name `golang` (not `go`) to avoid the keyword conflict.
+
+The `java` package is not a provider — it holds the JDK runtime manager that the `javagradle` and `javamaven` providers share, since the two differ in their build tool rather than in their SDK.
 
 The `dart` package covers Flutter too — both declare the same `pubspec.yaml`, so they are one provider rather than two, and `dart.IsFlutter` is the single place that decides which toolchain (`dart` or `flutter`) a given repository is driven with.
 
@@ -58,7 +65,7 @@ The `dart` package covers Flutter too — both declare the same `pubspec.yaml`, 
 
 1. Create package under `pkg/infrastructure/languages/<name>/`
 2. Implement `Detector`, `VersionReader`, `VersionWriter`, `DependencyReader`, `DependencyUpdater`, and optionally `BuildValidator` and `RuntimeManager` (or a subset for detection-only providers)
-3. Create `Provider` struct with embedded composition and a `NewProvider()` constructor
+3. Create a `NewProvider()` constructor returning a `*repositories.CompositeProvider` wired with those parts
 4. Add a `Language` constant in `pkg/domain/entities/language.go`
 5. Register in `pkg/infrastructure/registry/default_registry.go` — **order matters**: `Detect` returns the first provider that matches, so a provider whose marker file is unambiguous must be registered ahead of one whose marker is weak (this is why `dart` precedes `node`)
 

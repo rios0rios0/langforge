@@ -7,7 +7,11 @@ import (
 	"github.com/rios0rios0/langforge/pkg/support/cmdexec"
 )
 
-const minVersionMatchGroups = 2
+// terraformCLIVersionRe matches the version the installed binary reports, whose
+// first line reads `Terraform v1.7.0`. It is deliberately distinct from
+// terraformVersionRe, which reads the required_version constraint a repository
+// declares.
+var terraformCLIVersionRe = regexp.MustCompile(`Terraform\s+v(\d+\.\d+(?:\.\d+)?)`)
 
 // RuntimeManager provides SDK and runtime information for Terraform projects.
 type RuntimeManager struct {
@@ -38,17 +42,5 @@ func (m *RuntimeManager) InstallCommand(version string) string {
 
 // CurrentVersion returns the currently installed Terraform version, or empty if not installed.
 func (m *RuntimeManager) CurrentVersion() (string, error) {
-	output, err := m.runner.RunOutput(".", "terraform", "version")
-	if err != nil {
-		if cmdexec.IsBinaryNotFound(err) {
-			return "", nil
-		}
-		return "", err
-	}
-	re := regexp.MustCompile(`Terraform\s+v(\d+\.\d+(?:\.\d+)?)`)
-	matches := re.FindStringSubmatch(output)
-	if len(matches) < minVersionMatchGroups {
-		return "", nil
-	}
-	return matches[1], nil
+	return cmdexec.CapturedVersion(m.runner, terraformCLIVersionRe, "terraform", "version")
 }

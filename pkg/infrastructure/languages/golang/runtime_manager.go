@@ -7,7 +7,9 @@ import (
 	"github.com/rios0rios0/langforge/pkg/support/cmdexec"
 )
 
-const minVersionMatchGroups = 2
+// goVersionRe matches the version in `go version` output, which reads
+// `go version go1.23.4 linux/amd64`.
+var goVersionRe = regexp.MustCompile(`go(\d+\.\d+(?:\.\d+)?)`)
 
 // RuntimeManager provides SDK and runtime information for Go projects.
 type RuntimeManager struct {
@@ -38,17 +40,5 @@ func (m *RuntimeManager) InstallCommand(version string) string {
 
 // CurrentVersion returns the currently installed Go version, or empty if not installed.
 func (m *RuntimeManager) CurrentVersion() (string, error) {
-	output, err := m.runner.RunOutput(".", "go", "version")
-	if err != nil {
-		if cmdexec.IsBinaryNotFound(err) {
-			return "", nil
-		}
-		return "", err
-	}
-	re := regexp.MustCompile(`go(\d+\.\d+(?:\.\d+)?)`)
-	matches := re.FindStringSubmatch(output)
-	if len(matches) < minVersionMatchGroups {
-		return "", nil
-	}
-	return matches[1], nil
+	return cmdexec.CapturedVersion(m.runner, goVersionRe, "go", "version")
 }

@@ -7,8 +7,6 @@ import (
 	"github.com/rios0rios0/langforge/pkg/support/cmdexec"
 )
 
-const minVersionMatchGroups = 2
-
 // dartVersionRe matches the version in `dart --version` output, which reads
 // `Dart SDK version: 3.13.0 (stable) (...) on "linux_x64"` and goes to stdout.
 var dartVersionRe = regexp.MustCompile(`Dart SDK version:\s+(\d+\.\d+\.\d+)`)
@@ -47,16 +45,5 @@ func (m *RuntimeManager) InstallCommand(version string) string {
 
 // CurrentVersion returns the installed Dart SDK version, or empty if absent.
 func (m *RuntimeManager) CurrentVersion() (string, error) {
-	output, err := m.runner.RunOutput(".", "dart", "--version")
-	if err != nil {
-		if cmdexec.IsBinaryNotFound(err) {
-			return "", nil
-		}
-		return "", err
-	}
-	matches := dartVersionRe.FindStringSubmatch(output)
-	if len(matches) < minVersionMatchGroups {
-		return "", nil
-	}
-	return matches[1], nil
+	return cmdexec.CapturedVersion(m.runner, dartVersionRe, "dart", "--version")
 }
