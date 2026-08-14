@@ -37,9 +37,11 @@ type LanguageInfo interface {
 // the same way, so they share this one type instead of each declaring its own
 // identical struct.
 //
-// A language that implements only some of the ports still uses this type: the
-// unset fields stay nil and the composite satisfies the narrower interface
-// (LanguageProvider or LanguageProviderWithValidation) that its callers ask for.
+// A language that implements only some of the ports leaves the rest nil, and
+// the composite still satisfies the narrower interface (LanguageProvider or
+// LanguageProviderWithValidation) its callers ask for. Only the ports it was
+// given may be called: the assertion below is that the type can stand in for
+// LanguageProviderFull, not that every instance carries a full set.
 type CompositeProvider struct {
 	LanguageDetector
 	VersionReader
