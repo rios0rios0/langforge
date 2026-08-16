@@ -4,7 +4,7 @@ go 1.26.6
 
 require (
 	github.com/Masterminds/semver/v3 v3.5.0
-	github.com/rios0rios0/testkit v0.2.6
+	github.com/rios0rios0/testkit v0.2.7
 	github.com/stretchr/testify v1.11.1
 )
 
