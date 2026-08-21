@@ -1,11 +1,11 @@
 module github.com/rios0rios0/langforge
 
-go 1.26.6
+go 1.27.0
 
 require (
 	github.com/Masterminds/semver/v3 v3.5.0
 	github.com/rios0rios0/testkit v0.2.7
-	github.com/stretchr/testify v1.12.0
+	github.com/stretchr/testify v1.12.1
 )
 
-require gopkg.in/yaml.v3 v3.0.1 // indirect
+require go.yaml.in/yaml/v3 v3.0.5 // indirect
