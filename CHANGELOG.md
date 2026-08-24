@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - changed the Go version to `1.27.0` and updated all module dependencies
+- refreshed `.github/copilot-instructions.md` to cover the Dart/Flutter and `java` packages and the `repositories.CompositeProvider` composition pattern, replacing the outdated embedded `Provider` struct guidance
 
 ## [1.0.2] - 2026-08-17
 
