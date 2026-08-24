@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-`langforge` is a shared Go library that provides language detection and ecosystem abstractions for Go, Node/TypeScript, Python, Java (Gradle and Maven), C#, Ruby, Terraform, Dockerfile, and Pipeline/CI. It exposes interfaces and implementations for:
+`langforge` is a shared Go library that provides language detection and ecosystem abstractions for 11 ecosystems: Go, Node/TypeScript, Python, Dart/Flutter, Java (Gradle and Maven), C#, Ruby, Terraform, Dockerfile, and Pipeline/CI. It exposes interfaces and implementations for:
 
 - Detecting which language/ecosystem a repository uses
 - Reading and writing a project's canonical version
@@ -26,6 +26,8 @@ pkg/
       golang/           # Go language provider (package name: golang, not go)
       node/
       python/
+      dart/             # Covers Flutter too (both share pubspec.yaml; IsFlutter picks the toolchain)
+      java/             # Not a provider — shared JDK runtime manager for javagradle/javamaven
       javagradle/
       javamaven/
       csharp/
@@ -70,38 +72,30 @@ Composite interfaces: `LanguageProvider` (first five), `LanguageProviderWithVali
    - `dependency_updater.go` — implements `DependencyUpdater`
    - `build_validator.go` — implements `BuildValidator` (optional)
    - `runtime_manager.go` — implements `RuntimeManager` (optional)
-   - `provider.go` — `Provider` struct embedding all of the above via pointer composition
+   - `provider.go` — a `NewProvider()` constructor returning a `*repositories.CompositeProvider` wired with those parts
 3. Register a new `Language` constant in `pkg/domain/entities/language.go`.
-4. Register the provider in `pkg/infrastructure/registry/default_registry.go`.
+4. Register the provider in `pkg/infrastructure/registry/default_registry.go`. **Order matters:** `Detect` returns the first provider that matches, so a provider with an unambiguous marker file must be registered ahead of one with a weak marker (this is why `dart` precedes `node` — a Flutter web project may keep a `package.json`, but only Dart uses `pubspec.yaml`).
 
-### Provider Struct Convention
+### Provider Composition
 
-Use **embedded struct composition** to satisfy the `LanguageProvider` interface:
+Every ecosystem composes the same seven ports the same way, so they all share one type — `repositories.CompositeProvider` — instead of each declaring an identical `Provider` struct. A package supplies only its own parts; unset fields stay nil, and the composite still satisfies the narrower interface (`LanguageProvider` or `LanguageProviderWithValidation`) its callers ask for.
 
 ```go
-type Provider struct {
-    *Detector
-    *VersionReader
-    *VersionWriter
-    *DependencyReader
-    *DependencyUpdater
-    *BuildValidator    // optional
-    *RuntimeManager    // optional
-}
-
-func NewProvider() *Provider {
+func NewProvider() *repositories.CompositeProvider {
     runner := cmdexec.NewDefaultRunner()
-    return &Provider{
-        Detector:          &Detector{},
+    return &repositories.CompositeProvider{
+        LanguageDetector:  &Detector{},
         VersionReader:     &VersionReader{},
         VersionWriter:     &VersionWriter{},
         DependencyReader:  &DependencyReader{},
         DependencyUpdater: NewDependencyUpdater(runner),
-        BuildValidator:    NewBuildValidator(runner),
-        RuntimeManager:    NewRuntimeManager(runner),
+        BuildValidator:    NewBuildValidator(runner),  // optional
+        RuntimeManager:    NewRuntimeManager(runner),  // optional
     }
 }
 ```
+
+`VersionWriter` and `DependencyUpdater` both declare `FilesChanged`, so the promoted method is ambiguous; `CompositeProvider.FilesChanged` resolves it by merging both results (writer's first, deduplicated), written and tested once instead of per-provider.
 
 ### Package Naming
 
