@@ -1,3 +1,0 @@
-kind: 'Fixed'
-body: 'corrected the pull request template checklist to run `make test`, since plain `go test` matches no unit tests behind the `unit` build tag'
-time: '2026-08-25T22:36:55.198568458Z'
