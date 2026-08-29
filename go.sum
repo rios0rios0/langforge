@@ -1,7 +1,7 @@
 github.com/Masterminds/semver/v3 v3.5.0 h1:kQceYJfbupGfZOKZQg0kou0DgAKhzDg2NZPAwZ/2OOE=
 github.com/Masterminds/semver/v3 v3.5.0/go.mod h1:4V+yj/TJE1HU9XfppCwVMZq3I84lprf4nC11bSS5beM=
-github.com/rios0rios0/testkit v0.3.0 h1:ciC4f5nvwr3Y5VOIc7UZAL9Umh8zijmaC0OZq4VjnSk=
-github.com/rios0rios0/testkit v0.3.0/go.mod h1:V3QQvbOM++F+85HX3lMhPEXTRbVcwIhDZHqJngF8wB4=
+github.com/rios0rios0/testkit v0.3.1 h1:Wx52hoN5P0z/F34TNsEngbO2HhJ3yoT2BhH3U5G8c4Y=
+github.com/rios0rios0/testkit v0.3.1/go.mod h1:V3QQvbOM++F+85HX3lMhPEXTRbVcwIhDZHqJngF8wB4=
 github.com/stretchr/testify v1.12.1 h1:EuwCh5fleGS7H32xRwO3wRGT7DxrDhLAT6FF8MpWDWE=
 github.com/stretchr/testify v1.12.1/go.mod h1:MDEgiDPPsNp5cuIrHPPCyornHKgEVbtFUmoNlxoYthg=
 go.yaml.in/yaml/v3 v3.0.5 h1:N6y/pJk8buWs9NY5ERU2HSMfm+IuD/OtfdAnq6kESPw=
