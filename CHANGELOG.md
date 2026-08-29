@@ -13,6 +13,12 @@ nothing.
 
 ## [Unreleased]
 
+## [1.1.2] - 2026-08-29
+
+### Changed
+
+- changed the Go module dependencies to their latest versions
+
 ## [1.1.1] - 2026-08-28
 
 ### Changed
