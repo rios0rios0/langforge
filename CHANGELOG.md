@@ -13,6 +13,12 @@ nothing.
 
 ## [Unreleased]
 
+## [1.1.5] - 2026-09-06
+
+### Changed
+
+- extracted the per-language build validators and runtime managers into shared `toolchain.BuildValidator` and `toolchain.RuntimeManager` implementations configured with each language's commands and `toolchain.SDK` description
+
 ## [1.1.4] - 2026-09-03
 
 ### Changed
