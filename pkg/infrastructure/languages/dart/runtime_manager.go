@@ -1,9 +1,9 @@
 package dart
 
 import (
-	"fmt"
 	"regexp"
 
+	"github.com/rios0rios0/langforge/pkg/infrastructure/languages/toolchain"
 	"github.com/rios0rios0/langforge/pkg/support/cmdexec"
 )
 
@@ -13,37 +13,29 @@ var dartVersionRe = regexp.MustCompile(`Dart SDK version:\s+(\d+\.\d+\.\d+)`)
 
 // RuntimeManager provides SDK and runtime information for Dart projects.
 type RuntimeManager struct {
-	runner cmdexec.Runner
+	*toolchain.RuntimeManager
 }
 
 // NewRuntimeManager creates a RuntimeManager with the given runner.
 func NewRuntimeManager(runner cmdexec.Runner) *RuntimeManager {
-	return &RuntimeManager{runner: runner}
+	return &RuntimeManager{toolchain.NewRuntimeManager(runner, dartSDK())}
 }
 
-// SDKName returns the human-readable SDK name.
-func (m *RuntimeManager) SDKName() string { return "Dart" }
-
-// VersionManager returns the version manager name.
+// dartSDK describes the Dart SDK.
 //
-// fvm manages Flutter installations, and every Flutter install carries the Dart
-// SDK it was built against, so it is the version manager for both. Pure Dart has
-// no widely adopted equivalent.
-func (m *RuntimeManager) VersionManager() string { return "fvm" }
-
-// StartCommand returns the default command to run a Dart project.
-// A Flutter application is started with `flutter run` instead.
-func (m *RuntimeManager) StartCommand() string { return "dart run" }
-
-// StopCommand returns an empty string since there is no standard stop command.
-func (m *RuntimeManager) StopCommand() string { return "" }
-
-// InstallCommand returns the fvm command to install a specific SDK version.
-func (m *RuntimeManager) InstallCommand(version string) string {
-	return fmt.Sprintf("fvm install %s", version)
-}
-
-// CurrentVersion returns the installed Dart SDK version, or empty if absent.
-func (m *RuntimeManager) CurrentVersion() (string, error) {
-	return cmdexec.CapturedVersion(m.runner, dartVersionRe, "dart", "--version")
+// fvm is its version manager: fvm manages Flutter installations, and every
+// Flutter install carries the Dart SDK it was built against, so it is the
+// version manager for both. Pure Dart has no widely adopted equivalent.
+//
+// `dart run` is the default start command; a Flutter application is started
+// with `flutter run` instead. There is no standard stop command.
+func dartSDK() toolchain.SDK {
+	return toolchain.SDK{
+		Name:           "Dart",
+		VersionManager: "fvm",
+		InstallCommand: "fvm install %s",
+		StartCommand:   "dart run",
+		VersionCommand: cmdexec.CommandSpec{Name: "dart", Args: []string{"--version"}},
+		VersionPattern: dartVersionRe,
+	}
 }

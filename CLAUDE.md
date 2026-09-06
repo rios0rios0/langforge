@@ -28,6 +28,7 @@ Hexagonal Architecture (Ports & Adapters) with DDD:
 - **`pkg/domain/entities/`** — Value objects: `Language` (enum), `Version` (semver wrapper), `Dependency`, `FileChecker` (pluggable file existence), `Classifier` (extension-based)
 - **`pkg/domain/repositories/`** — Interface contracts (ports): `LanguageDetector`, `VersionReader`, `VersionWriter`, `DependencyReader`, `DependencyUpdater`, `BuildValidator`, `RuntimeManager`. Composite interfaces: `LanguageProvider` (first five), `LanguageProviderWithValidation` (adds `BuildValidator`), `LanguageProviderFull` (adds `RuntimeManager`).
 - **`pkg/infrastructure/languages/<ecosystem>/`** — One package per ecosystem implementing the domain interfaces. Full providers have: `detector.go`, `version_reader.go`, `version_writer.go`, `dependency_reader.go`, `dependency_updater.go`, `build_validator.go`, `runtime_manager.go`, `provider.go`. Dockerfile and Pipeline packages implement only `Detector`.
+- **`pkg/infrastructure/languages/toolchain/`** — Not a provider: the `BuildValidator` and `RuntimeManager` implementations every ecosystem composes, configured per language with `toolchain.Commands` (lint and build command specs) and `toolchain.SDK` (name, version manager, install/start/stop commands, version command and capture pattern). A language's `build_validator.go` and `runtime_manager.go` embed these and supply only their own data.
 - **`pkg/infrastructure/registry/`** — `LanguageRegistry` maps `Language` → `LanguageProvider`; `NewDefaultRegistry()` wires all built-in providers.
 - **`pkg/infrastructure/versions/`** — Version fetchers for retrieving latest stable versions from public APIs (endoflife.date, etc.).
 - **`pkg/support/`** — Cross-cutting utilities: `cmdexec/` (shell command runner), `fileutil/` (file I/O helpers, `LocalFileChecker`).
@@ -64,7 +65,7 @@ The `dart` package covers Flutter too — both declare the same `pubspec.yaml`, 
 ## Adding a new language provider
 
 1. Create package under `pkg/infrastructure/languages/<name>/`
-2. Implement `Detector`, `VersionReader`, `VersionWriter`, `DependencyReader`, `DependencyUpdater`, and optionally `BuildValidator` and `RuntimeManager` (or a subset for detection-only providers)
+2. Implement `Detector`, `VersionReader`, `VersionWriter`, `DependencyReader`, `DependencyUpdater`, and optionally `BuildValidator` and `RuntimeManager` (or a subset for detection-only providers). For the last two, embed `toolchain.NewBuildValidator` / `toolchain.NewRuntimeManager` and supply the language's `toolchain.Commands` and `toolchain.SDK` instead of re-implementing the ports
 3. Create a `NewProvider()` constructor returning a `*repositories.CompositeProvider` wired with those parts
 4. Add a `Language` constant in `pkg/domain/entities/language.go`
 5. Register in `pkg/infrastructure/registry/default_registry.go` — **order matters**: `Detect` returns the first provider that matches, so a provider whose marker file is unambiguous must be registered ahead of one whose marker is weak (this is why `dart` precedes `node`)

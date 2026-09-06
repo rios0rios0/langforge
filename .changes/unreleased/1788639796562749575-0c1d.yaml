@@ -1,0 +1,3 @@
+kind: 'Changed'
+body: 'extracted the per-language build validators and runtime managers into shared `toolchain.BuildValidator` and `toolchain.RuntimeManager` implementations configured with each language''s commands and `toolchain.SDK` description'
+time: '2026-09-05T20:23:16.562691293Z'

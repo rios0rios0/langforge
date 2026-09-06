@@ -1,9 +1,9 @@
 package golang
 
 import (
-	"fmt"
 	"regexp"
 
+	"github.com/rios0rios0/langforge/pkg/infrastructure/languages/toolchain"
 	"github.com/rios0rios0/langforge/pkg/support/cmdexec"
 )
 
@@ -13,32 +13,23 @@ var goVersionRe = regexp.MustCompile(`go(\d+\.\d+(?:\.\d+)?)`)
 
 // RuntimeManager provides SDK and runtime information for Go projects.
 type RuntimeManager struct {
-	runner cmdexec.Runner
+	*toolchain.RuntimeManager
 }
 
 // NewRuntimeManager creates a RuntimeManager with the given runner.
 func NewRuntimeManager(runner cmdexec.Runner) *RuntimeManager {
-	return &RuntimeManager{runner: runner}
+	return &RuntimeManager{toolchain.NewRuntimeManager(runner, goSDK())}
 }
 
-// SDKName returns the human-readable SDK name.
-func (m *RuntimeManager) SDKName() string { return "Go" }
-
-// VersionManager returns the version manager name.
-func (m *RuntimeManager) VersionManager() string { return "gvm" }
-
-// StartCommand returns the default command to run a Go project.
-func (m *RuntimeManager) StartCommand() string { return "go run ." }
-
-// StopCommand returns an empty string since Go has no long-running dev server.
-func (m *RuntimeManager) StopCommand() string { return "" }
-
-// InstallCommand returns the gvm command to install a specific Go version.
-func (m *RuntimeManager) InstallCommand(version string) string {
-	return fmt.Sprintf("gvm install go%s", version)
-}
-
-// CurrentVersion returns the currently installed Go version, or empty if not installed.
-func (m *RuntimeManager) CurrentVersion() (string, error) {
-	return cmdexec.CapturedVersion(m.runner, goVersionRe, "go", "version")
+// goSDK describes the Go SDK: gvm installs it, `go run` starts a project, there
+// is no long-running dev server to stop, and `go version` reports the version.
+func goSDK() toolchain.SDK {
+	return toolchain.SDK{
+		Name:           "Go",
+		VersionManager: "gvm",
+		InstallCommand: "gvm install go%s",
+		StartCommand:   "go run .",
+		VersionCommand: cmdexec.CommandSpec{Name: "go", Args: []string{"version"}},
+		VersionPattern: goVersionRe,
+	}
 }

@@ -28,6 +28,7 @@ pkg/
       python/
       dart/             # Covers Flutter too (both share pubspec.yaml; IsFlutter picks the toolchain)
       java/             # Not a provider — shared JDK runtime manager for javagradle/javamaven
+      toolchain/        # Not a provider — shared BuildValidator/RuntimeManager, configured per language
       javagradle/
       javamaven/
       csharp/
@@ -70,8 +71,8 @@ Composite interfaces: `LanguageProvider` (first five), `LanguageProviderWithVali
    - `version_writer.go` — implements `VersionWriter`
    - `dependency_reader.go` — implements `DependencyReader`
    - `dependency_updater.go` — implements `DependencyUpdater`
-   - `build_validator.go` — implements `BuildValidator` (optional)
-   - `runtime_manager.go` — implements `RuntimeManager` (optional)
+   - `build_validator.go` — implements `BuildValidator` (optional) by embedding `toolchain.NewBuildValidator` with the language's `toolchain.Commands`
+   - `runtime_manager.go` — implements `RuntimeManager` (optional) by embedding `toolchain.NewRuntimeManager` with the language's `toolchain.SDK`
    - `provider.go` — a `NewProvider()` constructor returning a `*repositories.CompositeProvider` wired with those parts
 3. Register a new `Language` constant in `pkg/domain/entities/language.go`.
 4. Register the provider in `pkg/infrastructure/registry/default_registry.go`. **Order matters:** `Detect` returns the first provider that matches, so a provider with an unambiguous marker file must be registered ahead of one with a weak marker (this is why `dart` precedes `node` — a Flutter web project may keep a `package.json`, but only Dart uses `pubspec.yaml`).

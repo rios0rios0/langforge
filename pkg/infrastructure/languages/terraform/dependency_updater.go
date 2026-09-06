@@ -40,7 +40,7 @@ func (u *DependencyUpdater) FilesChanged(repoPath string) ([]string, error) {
 
 // UpdateAll runs terraform init -upgrade.
 func (u *DependencyUpdater) UpdateAll(repoPath string) error {
-	return u.runner.Run(repoPath, "terraform", "init", "-upgrade")
+	return u.runner.Run(repoPath, terraformCLI, "init", "-upgrade")
 }
 
 // UpdateRefTags updates ?ref=<tag> references in Terraform module sources.

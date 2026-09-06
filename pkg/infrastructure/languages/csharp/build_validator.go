@@ -1,31 +1,25 @@
 package csharp
 
-import "github.com/rios0rios0/langforge/pkg/support/cmdexec"
+import (
+	"github.com/rios0rios0/langforge/pkg/infrastructure/languages/toolchain"
+	"github.com/rios0rios0/langforge/pkg/support/cmdexec"
+)
 
 // BuildValidator runs lint and build checks for C# projects.
 type BuildValidator struct {
-	runner cmdexec.Runner
+	*toolchain.BuildValidator
 }
 
 // NewBuildValidator creates a BuildValidator with the given runner.
 func NewBuildValidator(runner cmdexec.Runner) *BuildValidator {
-	return &BuildValidator{runner: runner}
+	return &BuildValidator{toolchain.NewBuildValidator(runner, dotnetCommands())}
 }
 
-// LintCommands returns the C# lint commands.
-func (v *BuildValidator) LintCommands() []string {
-	return []string{"dotnet format --verify-no-changes"}
-}
-
-// BuildCommands returns the C# build commands.
-func (v *BuildValidator) BuildCommands() []string {
-	return []string{"dotnet build"}
-}
-
-// Validate runs lint and build commands in the given repo path.
-func (v *BuildValidator) Validate(repoPath string) error {
-	if err := v.runner.Run(repoPath, "dotnet", "format", "--verify-no-changes"); err != nil {
-		return err
+// dotnetCommands lists the checks a C# project must pass: a formatting check
+// that rejects unformatted files, then a build.
+func dotnetCommands() toolchain.Commands {
+	return toolchain.Commands{
+		Lint:  []cmdexec.CommandSpec{{Name: dotnetCLI, Args: []string{"format", "--verify-no-changes"}}},
+		Build: []cmdexec.CommandSpec{{Name: dotnetCLI, Args: []string{"build"}}},
 	}
-	return v.runner.Run(repoPath, "dotnet", "build")
 }

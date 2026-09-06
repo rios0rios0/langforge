@@ -80,6 +80,7 @@ langforge/
 │   │                         # DependencyReader, DependencyUpdater, BuildValidator
 │   ├── infrastructure/
 │   │   ├── languages/        # Go, Node, Python, Java (Gradle/Maven), C#, Terraform
+│   │   │   └── toolchain/    # Shared BuildValidator/RuntimeManager, configured per language
 │   │   └── registry/         # LanguageRegistry with auto-detection and default setup
 │   └── support/
 │       ├── cmdexec/          # Shell command execution wrapper

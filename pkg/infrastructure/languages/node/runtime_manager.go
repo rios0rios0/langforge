@@ -1,47 +1,35 @@
 package node
 
 import (
-	"fmt"
-	"strings"
+	"regexp"
 
+	"github.com/rios0rios0/langforge/pkg/infrastructure/languages/toolchain"
 	"github.com/rios0rios0/langforge/pkg/support/cmdexec"
 )
 
+// nodeVersionRe matches the version in `node --version` output, which reads
+// `v20.11.0`: the leading v is dropped and the rest is kept whole.
+var nodeVersionRe = regexp.MustCompile(`^v?(\S+)`)
+
 // RuntimeManager provides SDK and runtime information for Node.js projects.
 type RuntimeManager struct {
-	runner cmdexec.Runner
+	*toolchain.RuntimeManager
 }
 
 // NewRuntimeManager creates a RuntimeManager with the given runner.
 func NewRuntimeManager(runner cmdexec.Runner) *RuntimeManager {
-	return &RuntimeManager{runner: runner}
+	return &RuntimeManager{toolchain.NewRuntimeManager(runner, nodeSDK())}
 }
 
-// SDKName returns the human-readable SDK name.
-func (m *RuntimeManager) SDKName() string { return "Node.js" }
-
-// VersionManager returns the version manager name.
-func (m *RuntimeManager) VersionManager() string { return "nvm" }
-
-// StartCommand returns the default command to start a Node.js project.
-func (m *RuntimeManager) StartCommand() string { return "npm start" }
-
-// StopCommand returns an empty string since there is no standard stop command.
-func (m *RuntimeManager) StopCommand() string { return "" }
-
-// InstallCommand returns the nvm command to install a specific Node.js version.
-func (m *RuntimeManager) InstallCommand(version string) string {
-	return fmt.Sprintf("nvm install %s", version)
-}
-
-// CurrentVersion returns the currently installed Node.js version, or empty if not installed.
-func (m *RuntimeManager) CurrentVersion() (string, error) {
-	output, err := m.runner.RunOutput(".", "node", "--version")
-	if err != nil {
-		if cmdexec.IsBinaryNotFound(err) {
-			return "", nil
-		}
-		return "", err
+// nodeSDK describes the Node.js SDK: nvm installs it, `npm start` starts a
+// project, there is no standard stop command, and node reports the version.
+func nodeSDK() toolchain.SDK {
+	return toolchain.SDK{
+		Name:           "Node.js",
+		VersionManager: "nvm",
+		InstallCommand: "nvm install %s",
+		StartCommand:   "npm start",
+		VersionCommand: cmdexec.CommandSpec{Name: "node", Args: []string{"--version"}},
+		VersionPattern: nodeVersionRe,
 	}
-	return strings.TrimPrefix(output, "v"), nil
 }
