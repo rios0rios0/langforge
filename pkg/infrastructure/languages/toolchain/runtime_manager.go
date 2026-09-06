@@ -26,6 +26,7 @@ type SDK struct {
 	// VersionCommand is the command whose output reports the installed version.
 	VersionCommand cmdexec.CommandSpec
 	// VersionPattern captures the version from that output in its first group.
+	// An SDK that leaves it nil reports an empty version.
 	VersionPattern *regexp.Regexp
 }
 
@@ -60,8 +61,16 @@ func (m *RuntimeManager) InstallCommand(version string) string {
 }
 
 // CurrentVersion returns the installed SDK version, or an empty string when the
-// SDK is not installed or reports a version the pattern cannot read.
+// SDK is not installed, describes no version pattern, or reports a version the
+// pattern cannot read.
 func (m *RuntimeManager) CurrentVersion() (string, error) {
+	// An SDK described without a pattern can never have its version read, so it
+	// reports the same empty version as unreadable output rather than running a
+	// command whose output nothing would match.
+	if m.sdk.VersionPattern == nil {
+		return "", nil
+	}
+
 	command := m.sdk.VersionCommand
 	return cmdexec.CapturedVersion(m.runner, m.sdk.VersionPattern, command.Name, command.Args...)
 }

@@ -152,4 +152,21 @@ func TestRuntimeManager_CurrentVersion(t *testing.T) {
 		require.NoError(t, err)
 		assert.Empty(t, version)
 	})
+
+	t.Run("should return an empty version when the SDK describes no version pattern", func(t *testing.T) {
+		t.Parallel()
+
+		// given
+		var ran []string
+		sdk := builders.NewSDKBuilder().WithVersionPattern(nil).Build().(toolchain.SDK)
+		m := toolchain.NewRuntimeManager(versionRunner("tool 1.2.3 (stable)", &ran), sdk)
+
+		// when
+		version, err := m.CurrentVersion()
+
+		// then
+		require.NoError(t, err)
+		assert.Empty(t, version)
+		assert.Empty(t, ran)
+	})
 }
