@@ -1,9 +1,9 @@
 package terraform
 
 import (
-	"fmt"
 	"regexp"
 
+	"github.com/rios0rios0/langforge/pkg/infrastructure/languages/toolchain"
 	"github.com/rios0rios0/langforge/pkg/support/cmdexec"
 )
 
@@ -15,32 +15,24 @@ var terraformCLIVersionRe = regexp.MustCompile(`Terraform\s+v(\d+\.\d+(?:\.\d+)?
 
 // RuntimeManager provides SDK and runtime information for Terraform projects.
 type RuntimeManager struct {
-	runner cmdexec.Runner
+	*toolchain.RuntimeManager
 }
 
 // NewRuntimeManager creates a RuntimeManager with the given runner.
 func NewRuntimeManager(runner cmdexec.Runner) *RuntimeManager {
-	return &RuntimeManager{runner: runner}
+	return &RuntimeManager{toolchain.NewRuntimeManager(runner, terraformSDK())}
 }
 
-// SDKName returns the human-readable SDK name.
-func (m *RuntimeManager) SDKName() string { return "Terraform" }
-
-// VersionManager returns the version manager name.
-func (m *RuntimeManager) VersionManager() string { return "tfenv" }
-
-// StartCommand returns the default command to apply a Terraform project.
-func (m *RuntimeManager) StartCommand() string { return "terraform apply" }
-
-// StopCommand returns an empty string since there is no standard stop command.
-func (m *RuntimeManager) StopCommand() string { return "" }
-
-// InstallCommand returns the tfenv command to install a specific Terraform version.
-func (m *RuntimeManager) InstallCommand(version string) string {
-	return fmt.Sprintf("tfenv install %s", version)
-}
-
-// CurrentVersion returns the currently installed Terraform version, or empty if not installed.
-func (m *RuntimeManager) CurrentVersion() (string, error) {
-	return cmdexec.CapturedVersion(m.runner, terraformCLIVersionRe, "terraform", "version")
+// terraformSDK describes the Terraform CLI: tfenv installs it, `terraform apply`
+// stands in for starting a project, there is no standard stop command, and
+// `terraform version` reports the version.
+func terraformSDK() toolchain.SDK {
+	return toolchain.SDK{
+		Name:           "Terraform",
+		VersionManager: "tfenv",
+		InstallCommand: "tfenv install %s",
+		StartCommand:   "terraform apply",
+		VersionCommand: cmdexec.CommandSpec{Name: terraformCLI, Args: []string{"version"}},
+		VersionPattern: terraformCLIVersionRe,
+	}
 }

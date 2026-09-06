@@ -1,31 +1,25 @@
 package node
 
-import "github.com/rios0rios0/langforge/pkg/support/cmdexec"
+import (
+	"github.com/rios0rios0/langforge/pkg/infrastructure/languages/toolchain"
+	"github.com/rios0rios0/langforge/pkg/support/cmdexec"
+)
 
 // BuildValidator runs lint and build checks for Node.js projects.
 type BuildValidator struct {
-	runner cmdexec.Runner
+	*toolchain.BuildValidator
 }
 
 // NewBuildValidator creates a BuildValidator with the given runner.
 func NewBuildValidator(runner cmdexec.Runner) *BuildValidator {
-	return &BuildValidator{runner: runner}
+	return &BuildValidator{toolchain.NewBuildValidator(runner, npmCommands())}
 }
 
-// LintCommands returns the Node.js lint commands.
-func (v *BuildValidator) LintCommands() []string {
-	return []string{"npm run lint"}
-}
-
-// BuildCommands returns the Node.js build commands.
-func (v *BuildValidator) BuildCommands() []string {
-	return []string{"npm run build"}
-}
-
-// Validate runs lint and build commands in the given repo path.
-func (v *BuildValidator) Validate(repoPath string) error {
-	if err := v.runner.Run(repoPath, "npm", "run", "lint"); err != nil {
-		return err
+// npmCommands lists the checks a Node.js project must pass: its lint script,
+// then its build script.
+func npmCommands() toolchain.Commands {
+	return toolchain.Commands{
+		Lint:  []cmdexec.CommandSpec{{Name: "npm", Args: []string{"run", "lint"}}},
+		Build: []cmdexec.CommandSpec{{Name: "npm", Args: []string{"run", "build"}}},
 	}
-	return v.runner.Run(repoPath, "npm", "run", "build")
 }

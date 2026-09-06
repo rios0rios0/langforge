@@ -33,5 +33,5 @@ func (u *DependencyUpdater) FilesChanged(repoPath string) ([]string, error) {
 
 // UpdateAll runs dotnet outdated --upgrade.
 func (u *DependencyUpdater) UpdateAll(repoPath string) error {
-	return u.runner.Run(repoPath, "dotnet", "outdated", "--upgrade")
+	return u.runner.Run(repoPath, dotnetCLI, "outdated", "--upgrade")
 }

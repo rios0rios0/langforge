@@ -1,51 +1,37 @@
 package csharp
 
 import (
-	"fmt"
-	"strings"
+	"regexp"
 
+	"github.com/rios0rios0/langforge/pkg/infrastructure/languages/toolchain"
 	"github.com/rios0rios0/langforge/pkg/support/cmdexec"
 )
 
+// dotnetVersionRe matches the version in `dotnet --version` output, which is the
+// bare version on a line of its own, `8.0.404`: it is kept whole, so a preview
+// suffix such as `9.0.100-preview.7.24407.12` survives.
+var dotnetVersionRe = regexp.MustCompile(`^(\S+)`)
+
 // RuntimeManager provides SDK and runtime information for C# projects.
 type RuntimeManager struct {
-	runner cmdexec.Runner
+	*toolchain.RuntimeManager
 }
 
 // NewRuntimeManager creates a RuntimeManager with the given runner.
 func NewRuntimeManager(runner cmdexec.Runner) *RuntimeManager {
-	return &RuntimeManager{runner: runner}
+	return &RuntimeManager{toolchain.NewRuntimeManager(runner, dotnetSDK())}
 }
 
-// SDKName returns the human-readable SDK name.
-func (m *RuntimeManager) SDKName() string { return ".NET" }
-
-// VersionManager returns the version manager name.
-func (m *RuntimeManager) VersionManager() string { return "dotnet" }
-
-// StartCommand returns the default command to run a C# project.
-func (m *RuntimeManager) StartCommand() string { return "dotnet run" }
-
-// StopCommand returns an empty string since there is no standard stop command.
-func (m *RuntimeManager) StopCommand() string { return "" }
-
-// InstallCommand returns the command to install a specific .NET SDK version.
-func (m *RuntimeManager) InstallCommand(version string) string {
-	return fmt.Sprintf("dotnet sdk install %s", version)
-}
-
-// CurrentVersion returns the currently installed .NET SDK version, or empty if not installed.
-func (m *RuntimeManager) CurrentVersion() (string, error) {
-	output, err := m.runner.RunOutput(".", "dotnet", "--version")
-	if err != nil {
-		if cmdexec.IsBinaryNotFound(err) {
-			return "", nil
-		}
-		return "", err
+// dotnetSDK describes the .NET SDK: the dotnet CLI installs it, `dotnet run`
+// starts a project, there is no standard stop command, and dotnet reports the
+// version.
+func dotnetSDK() toolchain.SDK {
+	return toolchain.SDK{
+		Name:           ".NET",
+		VersionManager: dotnetCLI,
+		InstallCommand: "dotnet sdk install %s",
+		StartCommand:   "dotnet run",
+		VersionCommand: cmdexec.CommandSpec{Name: dotnetCLI, Args: []string{"--version"}},
+		VersionPattern: dotnetVersionRe,
 	}
-	version := strings.TrimSpace(output)
-	if version == "" {
-		return "", nil
-	}
-	return version, nil
 }
