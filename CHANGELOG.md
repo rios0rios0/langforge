@@ -13,6 +13,12 @@ nothing.
 
 ## [Unreleased]
 
+## [1.1.11] - 2026-10-28
+
+### Changed
+
+- changed the Go module `github.com/rios0rios0/testkit` from `v0.3.6` to `v0.3.7`
+
 ## [1.1.10] - 2026-10-21
 
 ### Changed
