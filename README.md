@@ -28,16 +28,17 @@ A shared Go library providing language detection and ecosystem abstractions for 
 
 ## Supported Ecosystems
 
-| Ecosystem       | Detection Files                                  | Version File     |
-|-----------------|--------------------------------------------------|------------------|
-| Go              | `go.mod`                                         | `go.mod`         |
-| Node/TypeScript | `package.json`, `yarn.lock`, `pnpm-lock.yaml`    | `package.json`   |
-| Python          | `pyproject.toml`, `setup.py`, `requirements.txt` | `pyproject.toml` |
-| Dart/Flutter    | `pubspec.yaml`                                   | `pubspec.yaml`   |
-| Java (Gradle)   | `build.gradle`, `build.gradle.kts`               | `build.gradle`   |
-| Java (Maven)    | `pom.xml`                                        | `pom.xml`        |
-| C#              | `.csproj`, `.sln`                                | `.csproj`        |
-| Terraform       | `.tf`, `.hcl`                                    | `*.tf`           |
+| Ecosystem       | Detection Files                                                              | Version File                          |
+|-----------------|------------------------------------------------------------------------------|---------------------------------------|
+| Go              | `go.mod`                                                                     | `go.mod`                              |
+| Node/TypeScript | `package.json`, `tsconfig.json`                                              | `package.json`                        |
+| Python          | `pyproject.toml`, `setup.py`, `requirements.txt`                             | `pyproject.toml`, `__init__.py`       |
+| Dart/Flutter    | `pubspec.yaml`                                                               | `pubspec.yaml`                        |
+| Java (Gradle)   | `build.gradle`, `build.gradle.kts`, `settings.gradle`, `settings.gradle.kts` | `build.gradle`, `build.gradle.kts`    |
+| Java (Maven)    | `pom.xml`                                                                    | `pom.xml`                             |
+| C#              | `.csproj`, `.sln`                                                            | `.csproj`                             |
+| Ruby            | `Gemfile`, `.gemspec`                                                        | `.gemspec`, `VERSION`                 |
+| Terraform       | `.tf`, `.hcl`                                                                | `versions.tf`                         |
 
 ## Installation
 
@@ -77,11 +78,13 @@ langforge/
 │   ├── domain/
 │   │   ├── entities/         # Language, Version, Dependency, FileChecker, Classifier
 │   │   └── repositories/     # LanguageProvider, LanguageDetector, VersionReader/Writer,
-│   │                         # DependencyReader, DependencyUpdater, BuildValidator
+│   │                         # DependencyReader, DependencyUpdater, BuildValidator, RuntimeManager
 │   ├── infrastructure/
-│   │   ├── languages/        # Go, Node, Python, Java (Gradle/Maven), C#, Terraform
+│   │   ├── languages/        # Go, Node, Python, Dart/Flutter, Java (Gradle/Maven), C#, Ruby,
+│   │   │   │                 # Terraform, plus detection-only Dockerfile and Pipeline
 │   │   │   └── toolchain/    # Shared BuildValidator/RuntimeManager, configured per language
-│   │   └── registry/         # LanguageRegistry with auto-detection and default setup
+│   │   ├── registry/         # LanguageRegistry with auto-detection and default setup
+│   │   └── versions/         # Latest-stable version fetchers over public APIs
 │   └── support/
 │       ├── cmdexec/          # Shell command execution wrapper
 │       └── fileutil/         # File I/O helpers, LocalFileChecker
@@ -99,8 +102,9 @@ The library uses Go interface composition through the `LanguageProvider` contrac
 - **`DependencyReader`**: Parse dependency manifests and return structured dependency lists
 - **`DependencyUpdater`**: Run native ecosystem update commands
 - **`BuildValidator`**: Validate project builds and linting
+- **`RuntimeManager`**: Describe the ecosystem's SDK (version manager, install/start/stop commands, current version)
 
-Each language provider composes these interfaces into a single `Provider` struct, enabling independent testing and reuse.
+Each language provider composes these interfaces into a shared `repositories.CompositeProvider`, enabling independent testing and reuse.
 
 ## Contributing
 

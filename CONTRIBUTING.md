@@ -7,7 +7,7 @@ development practices, refer to the **[Development Guide](https://github.com/rio
 
 ## Prerequisites
 
-- [Go](https://go.dev/dl/) 1.26+
+- [Go](https://go.dev/dl/) 1.27+
 - [Make](https://www.gnu.org/software/make/)
 - [chlog](https://github.com/luizjhonata/chlog) (`go install github.com/luizjhonata/chlog@latest`)
 
@@ -30,5 +30,5 @@ development practices, refer to the **[Development Guide](https://github.com/rio
    ```bash
    chlog new --kind Added --body 'added the thing that was not there before'
    ```
-7. Commit following the [commit conventions](https://github.com/rios0rios0/guide/wiki/Life-Cycle/Git-Flow)
+7. Commit following the [commit conventions](https://github.com/rios0rios0/guide/wiki/Git-Flow)
 8. Open a pull request against `main`

@@ -153,7 +153,7 @@ The module path is `github.com/rios0rios0/langforge`.
 - Prefer returning `error` over panicking; only use `Must*` constructors in tests or package-level `init`/`var` blocks.
 - All public types and functions must have doc comments.
 - Add a changelog fragment for every change with `chlog new --kind <Kind> --body '...'`; `CHANGELOG.md` is generated from the fragments and is never edited by hand.
-- Commits follow the [rios0rios0 Git Flow conventions](https://github.com/rios0rios0/guide/wiki/Life-Cycle/Git-Flow).
+- Commits follow the [rios0rios0 Git Flow conventions](https://github.com/rios0rios0/guide/wiki/Git-Flow).
 
 <!-- chlog:start -->
 ## Changelog (chlog) — MANDATORY

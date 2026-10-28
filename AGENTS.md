@@ -1,6 +1,6 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to AI coding agents (Claude Code, Codex, Cursor, GitHub Copilot) when working with code in this repository.
 
 ## Project
 
@@ -37,22 +37,7 @@ Hexagonal Architecture (Ports & Adapters) with DDD:
 
 ### Provider pattern
 
-Every ecosystem composes the same seven ports the same way, so they share one composite type — `repositories.CompositeProvider` — instead of each declaring an identical struct. A language package supplies only its own parts:
-
-```go
-func NewProvider() *repositories.CompositeProvider {
-    runner := cmdexec.NewDefaultRunner()
-    return &repositories.CompositeProvider{
-        LanguageDetector:  &Detector{},
-        VersionReader:     &VersionReader{},
-        VersionWriter:     &VersionWriter{},
-        DependencyReader:  &DependencyReader{},
-        DependencyUpdater: NewDependencyUpdater(runner),
-        BuildValidator:    NewBuildValidator(runner),  // optional — implements LanguageProviderWithValidation
-        RuntimeManager:    NewRuntimeManager(runner),  // optional — implements LanguageProviderFull
-    }
-}
-```
+Every ecosystem composes the same seven ports the same way, so they share one composite type — `repositories.CompositeProvider` — instead of each declaring an identical struct. A language package supplies only its own parts; `pkg/infrastructure/languages/golang/provider.go` is the reference wiring. `BuildValidator` is optional (adds `LanguageProviderWithValidation`), as is `RuntimeManager` (adds `LanguageProviderFull`).
 
 Unset fields stay nil, and the composite still satisfies the narrower interface (`LanguageProvider` or `LanguageProviderWithValidation`) its callers ask for. `VersionWriter` and `DependencyUpdater` both declare `FilesChanged`, so the promoted method is ambiguous; `CompositeProvider.FilesChanged` resolves it by merging both results, written and tested once.
 
@@ -78,12 +63,6 @@ The `dart` package covers Flutter too — both declare the same `pubspec.yaml`, 
 - Parallel execution: `t.Parallel()` at test function and sub-test level
 - Use builders from `test/builders/` and stubs from `test/doubles/`
 - Framework: `github.com/stretchr/testify` (assertions + suites) and `github.com/rios0rios0/testkit`
-
-## Key dependencies
-
-- `github.com/Masterminds/semver/v3` — semantic version parsing
-- `github.com/stretchr/testify` — test assertions and suites
-- `github.com/rios0rios0/testkit` — shared test utilities
 
 <!-- chlog:start -->
 ## Changelog (chlog) — MANDATORY
