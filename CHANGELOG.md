@@ -13,6 +13,14 @@ nothing.
 
 ## [Unreleased]
 
+## [1.1.11] - 2026-11-04
+
+### Changed
+
+- changed the Go module `github.com/rios0rios0/testkit` from `v0.3.6` to `v0.3.7`
+- changed the Go module `go.yaml.in/yaml/v3` from `v3.0.5` to `v3.0.6`
+- moved the agent instructions from `CLAUDE.md` to `AGENTS.md`, keeping a `CLAUDE.md` that imports it, pointed the code-review skill at `AGENTS.md`, and corrected the ecosystem table, architecture and Go version in `README.md` and `CONTRIBUTING.md`
+
 ## [1.1.10] - 2026-10-21
 
 ### Changed
