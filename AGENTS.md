@@ -14,12 +14,12 @@ make lint              # run golangci-lint via pipelines
 make test              # run all tests via pipelines
 make sast              # run full SAST suite (CodeQL, Semgrep, Trivy, Hadolint, Gitleaks)
 go build ./...                                               # build all packages
-go test -tags=unit ./...                                     # run all tests directly
-go test -tags=unit -v ./pkg/infrastructure/languages/golang  # run tests for a specific package
-go test -tags=unit -run TestGoVersionReader ./...             # run a single test by name
+go test ./...                                                # run all tests directly
+go test -v ./pkg/infrastructure/languages/golang             # run tests for a specific package
+go test -run TestGoVersionReader ./...                       # run a single test by name
 ```
 
-Prefer `make lint` / `make test` / `make sast` for CI-equivalent validation. Direct `go test -tags=unit` is fine for quick local iteration.
+Prefer `make lint` / `make test` / `make sast` for CI-equivalent validation. Direct `go test ./...` is fine for quick local iteration.
 
 ## Architecture
 
@@ -57,7 +57,7 @@ The `dart` package covers Flutter too — both declare the same `pubspec.yaml`, 
 
 ## Testing conventions
 
-- Build tag: `//go:build unit` on all unit tests
+- No build tag on unit tests: a plain `go test ./...`, IDE runs and the linter all see them (the team's testing standard bans the `unit` tag); only a test that needs real infrastructure would carry `//go:build integration`
 - External test packages (e.g., `package golang_test`)
 - BDD structure with `// given`, `// when`, `// then` comment blocks
 - Parallel execution: `t.Parallel()` at test function and sub-test level

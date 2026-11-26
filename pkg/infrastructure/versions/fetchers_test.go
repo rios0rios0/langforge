@@ -1,6 +1,4 @@
-//go:build unit
-
-package versions
+package versions_test
 
 import (
 	"context"
@@ -10,6 +8,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/rios0rios0/langforge/pkg/infrastructure/versions"
 )
 
 func TestIsLTSRelease(t *testing.T) {
@@ -19,10 +19,10 @@ func TestIsLTSRelease(t *testing.T) {
 		t.Parallel()
 
 		// given
-		release := nodeRelease{Version: "v22.0.0", LTS: "Jod"}
+		release := versions.NodeRelease{Version: "v22.0.0", LTS: "Jod"}
 
 		// when
-		result := isLTSRelease(release)
+		result := versions.IsLTSRelease(release)
 
 		// then
 		assert.True(t, result)
@@ -32,10 +32,10 @@ func TestIsLTSRelease(t *testing.T) {
 		t.Parallel()
 
 		// given
-		release := nodeRelease{Version: "v23.0.0", LTS: ""}
+		release := versions.NodeRelease{Version: "v23.0.0", LTS: ""}
 
 		// when
-		result := isLTSRelease(release)
+		result := versions.IsLTSRelease(release)
 
 		// then
 		assert.False(t, result)
@@ -45,10 +45,10 @@ func TestIsLTSRelease(t *testing.T) {
 		t.Parallel()
 
 		// given
-		release := nodeRelease{Version: "v23.0.0", LTS: false}
+		release := versions.NodeRelease{Version: "v23.0.0", LTS: false}
 
 		// when
-		result := isLTSRelease(release)
+		result := versions.IsLTSRelease(release)
 
 		// then
 		assert.False(t, result)
@@ -58,10 +58,10 @@ func TestIsLTSRelease(t *testing.T) {
 		t.Parallel()
 
 		// given
-		release := nodeRelease{Version: "v22.0.0", LTS: true}
+		release := versions.NodeRelease{Version: "v22.0.0", LTS: true}
 
 		// when
-		result := isLTSRelease(release)
+		result := versions.IsLTSRelease(release)
 
 		// then
 		assert.True(t, result)
@@ -71,10 +71,10 @@ func TestIsLTSRelease(t *testing.T) {
 		t.Parallel()
 
 		// given
-		release := nodeRelease{Version: "v22.0.0", LTS: 42}
+		release := versions.NodeRelease{Version: "v22.0.0", LTS: 42}
 
 		// when
-		result := isLTSRelease(release)
+		result := versions.IsLTSRelease(release)
 
 		// then
 		assert.False(t, result)
@@ -91,7 +91,7 @@ func TestIsActiveEOL(t *testing.T) {
 		eol := false
 
 		// when
-		result := isActiveEOL(eol)
+		result := versions.IsActiveEOL(eol)
 
 		// then
 		assert.True(t, result)
@@ -104,7 +104,7 @@ func TestIsActiveEOL(t *testing.T) {
 		eol := true
 
 		// when
-		result := isActiveEOL(eol)
+		result := versions.IsActiveEOL(eol)
 
 		// then
 		assert.False(t, result)
@@ -117,7 +117,7 @@ func TestIsActiveEOL(t *testing.T) {
 		eol := "2099-12-31"
 
 		// when
-		result := isActiveEOL(eol)
+		result := versions.IsActiveEOL(eol)
 
 		// then
 		assert.True(t, result)
@@ -130,7 +130,7 @@ func TestIsActiveEOL(t *testing.T) {
 		eol := "2020-01-01"
 
 		// when
-		result := isActiveEOL(eol)
+		result := versions.IsActiveEOL(eol)
 
 		// then
 		assert.False(t, result)
@@ -143,7 +143,7 @@ func TestIsActiveEOL(t *testing.T) {
 		eol := "not-a-date"
 
 		// when
-		result := isActiveEOL(eol)
+		result := versions.IsActiveEOL(eol)
 
 		// then
 		assert.False(t, result)
@@ -156,7 +156,7 @@ func TestIsActiveEOL(t *testing.T) {
 		eol := 42
 
 		// when
-		result := isActiveEOL(eol)
+		result := versions.IsActiveEOL(eol)
 
 		// then
 		assert.False(t, result)
@@ -177,8 +177,8 @@ func TestFetchLatestGoVersion(t *testing.T) {
 		defer server.Close()
 
 		// when
-		var releases []goRelease
-		err := fetchJSON(context.Background(), server.Client(), server.URL, &releases)
+		var releases []versions.GoRelease
+		err := versions.FetchJSON(context.Background(), server.Client(), server.URL, &releases)
 		require.NoError(t, err)
 
 		var version string
@@ -204,8 +204,8 @@ func TestFetchLatestGoVersion(t *testing.T) {
 		defer server.Close()
 
 		// when
-		var releases []goRelease
-		err := fetchJSON(context.Background(), server.Client(), server.URL, &releases)
+		var releases []versions.GoRelease
+		err := versions.FetchJSON(context.Background(), server.Client(), server.URL, &releases)
 		require.NoError(t, err)
 
 		var found bool
@@ -235,13 +235,13 @@ func TestFetchLatestNodeVersion(t *testing.T) {
 		defer server.Close()
 
 		// when
-		var releases []nodeRelease
-		err := fetchJSON(context.Background(), server.Client(), server.URL, &releases)
+		var releases []versions.NodeRelease
+		err := versions.FetchJSON(context.Background(), server.Client(), server.URL, &releases)
 		require.NoError(t, err)
 
 		var version string
 		for _, release := range releases {
-			if isLTSRelease(release) {
+			if versions.IsLTSRelease(release) {
 				version = release.Version
 				break
 			}
@@ -269,9 +269,9 @@ func TestFetchEndOfLifeLatest(t *testing.T) {
 		defer server.Close()
 
 		// when
-		version, err := fetchEndOfLifeLatest(
+		version, err := versions.FetchEndOfLifeLatest(
 			context.Background(), server.Client(), server.URL, "Python",
-			func(r eolRelease) bool { return isActiveEOL(r.EOL) },
+			func(r versions.EOLRelease) bool { return versions.IsActiveEOL(r.EOL) },
 		)
 
 		// then
@@ -294,9 +294,9 @@ func TestFetchEndOfLifeLatest(t *testing.T) {
 		defer server.Close()
 
 		// when
-		version, err := fetchEndOfLifeLatest(
+		version, err := versions.FetchEndOfLifeLatest(
 			context.Background(), server.Client(), server.URL, "Java",
-			func(r eolRelease) bool { return r.LTS && isActiveEOL(r.EOL) },
+			func(r versions.EOLRelease) bool { return r.LTS && versions.IsActiveEOL(r.EOL) },
 		)
 
 		// then
@@ -315,9 +315,9 @@ func TestFetchEndOfLifeLatest(t *testing.T) {
 		defer server.Close()
 
 		// when
-		_, err := fetchEndOfLifeLatest(
+		_, err := versions.FetchEndOfLifeLatest(
 			context.Background(), server.Client(), server.URL, "Terraform",
-			func(r eolRelease) bool { return isActiveEOL(r.EOL) },
+			func(r versions.EOLRelease) bool { return versions.IsActiveEOL(r.EOL) },
 		)
 
 		// then
@@ -335,9 +335,9 @@ func TestFetchEndOfLifeLatest(t *testing.T) {
 		defer server.Close()
 
 		// when
-		_, err := fetchEndOfLifeLatest(
+		_, err := versions.FetchEndOfLifeLatest(
 			context.Background(), server.Client(), server.URL, "Java",
-			func(r eolRelease) bool { return r.LTS && isActiveEOL(r.EOL) },
+			func(r versions.EOLRelease) bool { return r.LTS && versions.IsActiveEOL(r.EOL) },
 		)
 
 		// then
@@ -356,9 +356,9 @@ func TestFetchEndOfLifeLatest(t *testing.T) {
 		defer server.Close()
 
 		// when
-		_, err := fetchEndOfLifeLatest(
+		_, err := versions.FetchEndOfLifeLatest(
 			context.Background(), server.Client(), server.URL, "Java",
-			func(r eolRelease) bool { return r.LTS && isActiveEOL(r.EOL) },
+			func(r versions.EOLRelease) bool { return r.LTS && versions.IsActiveEOL(r.EOL) },
 		)
 
 		// then

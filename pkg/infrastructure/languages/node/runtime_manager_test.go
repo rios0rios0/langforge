@@ -1,5 +1,3 @@
-//go:build unit
-
 package node_test
 
 import (

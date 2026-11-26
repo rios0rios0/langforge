@@ -1,5 +1,3 @@
-//go:build unit
-
 package toolchain_test
 
 import (
@@ -133,7 +131,7 @@ func TestRuntimeManager_CurrentVersion(t *testing.T) {
 
 		// then
 		require.ErrorIs(t, err, expectedErr)
-		assert.NotErrorIs(t, err, exec.ErrNotFound)
+		require.NotErrorIs(t, err, exec.ErrNotFound)
 		assert.Empty(t, version)
 	})
 

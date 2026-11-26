@@ -1,5 +1,3 @@
-//go:build unit
-
 package python_test
 
 import (
@@ -22,7 +20,14 @@ func TestPythonDetector(t *testing.T) {
 
 		// given
 		dir := t.TempDir()
-		require.NoError(t, os.WriteFile(filepath.Join(dir, "pyproject.toml"), []byte("[project]\nname=\"foo\"\nversion=\"1.0.0\"\n"), 0o600))
+		require.NoError(
+			t,
+			os.WriteFile(
+				filepath.Join(dir, "pyproject.toml"),
+				[]byte("[project]\nname=\"foo\"\nversion=\"1.0.0\"\n"),
+				0o600,
+			),
+		)
 		d := &python.Detector{}
 
 		// when
@@ -38,7 +43,10 @@ func TestPythonDetector(t *testing.T) {
 
 		// given
 		dir := t.TempDir()
-		require.NoError(t, os.WriteFile(filepath.Join(dir, "setup.py"), []byte("from setuptools import setup\n"), 0o600))
+		require.NoError(
+			t,
+			os.WriteFile(filepath.Join(dir, "setup.py"), []byte("from setuptools import setup\n"), 0o600),
+		)
 		d := &python.Detector{}
 
 		// when
