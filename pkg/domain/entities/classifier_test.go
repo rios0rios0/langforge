@@ -1,5 +1,3 @@
-//go:build unit
-
 package entities_test
 
 import (
@@ -14,6 +12,8 @@ func TestClassifyFileByExtension(t *testing.T) {
 	t.Parallel()
 
 	t.Run("should return LanguageGo when file has .go extension", func(t *testing.T) {
+		t.Parallel()
+
 		// given
 		filePath := "main.go"
 
@@ -25,6 +25,8 @@ func TestClassifyFileByExtension(t *testing.T) {
 	})
 
 	t.Run("should return LanguageNode when file has .js extension", func(t *testing.T) {
+		t.Parallel()
+
 		// given
 		filePath := "index.js"
 
@@ -36,6 +38,8 @@ func TestClassifyFileByExtension(t *testing.T) {
 	})
 
 	t.Run("should return LanguageNode when file has .tsx extension", func(t *testing.T) {
+		t.Parallel()
+
 		// given
 		filePath := "component.tsx"
 
@@ -47,6 +51,8 @@ func TestClassifyFileByExtension(t *testing.T) {
 	})
 
 	t.Run("should return LanguagePython when file has .py extension", func(t *testing.T) {
+		t.Parallel()
+
 		// given
 		filePath := "script.py"
 
@@ -58,6 +64,8 @@ func TestClassifyFileByExtension(t *testing.T) {
 	})
 
 	t.Run("should return LanguageJava when file has .java extension", func(t *testing.T) {
+		t.Parallel()
+
 		// given
 		filePath := "Main.java"
 
@@ -69,6 +77,8 @@ func TestClassifyFileByExtension(t *testing.T) {
 	})
 
 	t.Run("should return LanguageCSharp when file has .cs extension", func(t *testing.T) {
+		t.Parallel()
+
 		// given
 		filePath := "Program.cs"
 
@@ -80,6 +90,8 @@ func TestClassifyFileByExtension(t *testing.T) {
 	})
 
 	t.Run("should return LanguageTerraform when file has .tf extension", func(t *testing.T) {
+		t.Parallel()
+
 		// given
 		filePath := "main.tf"
 
@@ -91,6 +103,8 @@ func TestClassifyFileByExtension(t *testing.T) {
 	})
 
 	t.Run("should return LanguageYAML when file has .yaml extension", func(t *testing.T) {
+		t.Parallel()
+
 		// given
 		filePath := "config.yaml"
 
@@ -102,6 +116,8 @@ func TestClassifyFileByExtension(t *testing.T) {
 	})
 
 	t.Run("should return LanguageYAML when file has .yml extension", func(t *testing.T) {
+		t.Parallel()
+
 		// given
 		filePath := "values.yml"
 
@@ -113,6 +129,8 @@ func TestClassifyFileByExtension(t *testing.T) {
 	})
 
 	t.Run("should return LanguageUnknown when extension is not recognized", func(t *testing.T) {
+		t.Parallel()
+
 		// given
 		filePath := "README.md"
 
@@ -124,6 +142,8 @@ func TestClassifyFileByExtension(t *testing.T) {
 	})
 
 	t.Run("should handle full paths with directories", func(t *testing.T) {
+		t.Parallel()
+
 		// given
 		filePath := "src/internal/handler.go"
 
@@ -139,6 +159,8 @@ func TestClassifyFilesByExtension(t *testing.T) {
 	t.Parallel()
 
 	t.Run("should return unique languages for multiple files", func(t *testing.T) {
+		t.Parallel()
+
 		// given
 		paths := []string{"main.go", "utils.go", "index.js", "script.py"}
 
@@ -153,6 +175,8 @@ func TestClassifyFilesByExtension(t *testing.T) {
 	})
 
 	t.Run("should exclude unknown extensions", func(t *testing.T) {
+		t.Parallel()
+
 		// given
 		paths := []string{"main.go", "README.md", "LICENSE"}
 
@@ -165,6 +189,8 @@ func TestClassifyFilesByExtension(t *testing.T) {
 	})
 
 	t.Run("should return empty slice when no files match", func(t *testing.T) {
+		t.Parallel()
+
 		// given
 		paths := []string{"README.md", "LICENSE", "Makefile"}
 
@@ -176,6 +202,8 @@ func TestClassifyFilesByExtension(t *testing.T) {
 	})
 
 	t.Run("should deduplicate languages from multiple files with same extension", func(t *testing.T) {
+		t.Parallel()
+
 		// given
 		paths := []string{"main.go", "handler.go", "service.go"}
 

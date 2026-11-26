@@ -1,5 +1,3 @@
-//go:build unit
-
 package dart_test
 
 import (
@@ -45,10 +43,12 @@ flutter:
   uses-material-design: true
 `
 
-func writePubspec(t *testing.T, content string) (dir string, path string) {
+// writePubspec writes content as pubspec.yaml in a fresh temporary directory and returns the
+// directory and the file's path.
+func writePubspec(t *testing.T, content string) (string, string) {
 	t.Helper()
-	dir = t.TempDir()
-	path = filepath.Join(dir, "pubspec.yaml")
+	dir := t.TempDir()
+	path := filepath.Join(dir, "pubspec.yaml")
 	require.NoError(t, os.WriteFile(path, []byte(content), 0o600))
 	return dir, path
 }

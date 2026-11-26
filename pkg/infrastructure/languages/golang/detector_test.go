@@ -1,5 +1,3 @@
-//go:build unit
-
 package golang_test
 
 import (
@@ -22,7 +20,10 @@ func TestGoDetector(t *testing.T) {
 
 		// given
 		dir := t.TempDir()
-		require.NoError(t, os.WriteFile(filepath.Join(dir, "go.mod"), []byte("module example.com/foo\n\ngo 1.21\n"), 0o600))
+		require.NoError(
+			t,
+			os.WriteFile(filepath.Join(dir, "go.mod"), []byte("module example.com/foo\n\ngo 1.21\n"), 0o600),
+		)
 		d := &golang.Detector{}
 
 		// when

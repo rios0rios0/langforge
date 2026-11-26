@@ -1,5 +1,3 @@
-//go:build unit
-
 package ruby_test
 
 import (
@@ -17,37 +15,39 @@ import (
 func TestRubyDetector(t *testing.T) {
 	t.Parallel()
 
-	t.Run("should detect Ruby project when Gemfile exists", func(t *testing.T) {
-		t.Parallel()
+	markers := []struct {
+		name    string
+		file    string
+		content string
+	}{
+		{
+			name:    "should detect Ruby project when Gemfile exists",
+			file:    "Gemfile",
+			content: "source 'https://rubygems.org'\n",
+		},
+		{
+			name:    "should detect Ruby project when .gemspec exists",
+			file:    "mygem.gemspec",
+			content: "Gem::Specification.new {}\n",
+		},
+	}
+	for _, marker := range markers {
+		t.Run(marker.name, func(t *testing.T) {
+			t.Parallel()
 
-		// given
-		dir := t.TempDir()
-		require.NoError(t, os.WriteFile(filepath.Join(dir, "Gemfile"), []byte("source 'https://rubygems.org'\n"), 0o600))
-		d := &ruby.Detector{}
+			// given
+			dir := t.TempDir()
+			require.NoError(t, os.WriteFile(filepath.Join(dir, marker.file), []byte(marker.content), 0o600))
+			d := &ruby.Detector{}
 
-		// when
-		detected, err := d.Detect(dir)
+			// when
+			detected, err := d.Detect(dir)
 
-		// then
-		require.NoError(t, err)
-		assert.True(t, detected)
-	})
-
-	t.Run("should detect Ruby project when .gemspec exists", func(t *testing.T) {
-		t.Parallel()
-
-		// given
-		dir := t.TempDir()
-		require.NoError(t, os.WriteFile(filepath.Join(dir, "mygem.gemspec"), []byte("Gem::Specification.new {}\n"), 0o600))
-		d := &ruby.Detector{}
-
-		// when
-		detected, err := d.Detect(dir)
-
-		// then
-		require.NoError(t, err)
-		assert.True(t, detected)
-	})
+			// then
+			require.NoError(t, err)
+			assert.True(t, detected)
+		})
+	}
 
 	t.Run("should not detect Ruby project when markers are absent", func(t *testing.T) {
 		t.Parallel()

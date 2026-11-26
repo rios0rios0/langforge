@@ -1,5 +1,3 @@
-//go:build unit
-
 package dart_test
 
 import (
@@ -18,6 +16,7 @@ import (
 // recordingRunner captures the commands a component would have executed.
 type recordingRunner struct {
 	*doubles.RunnerStub
+
 	commands []string
 }
 

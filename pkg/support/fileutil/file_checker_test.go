@@ -1,5 +1,3 @@
-//go:build unit
-
 package fileutil_test
 
 import (
@@ -95,7 +93,7 @@ func TestNewFileChecker(t *testing.T) {
 				assert.Equal(t, "go.mod", path)
 				return true, nil
 			},
-			func(pattern string) (bool, error) {
+			func(_ string) (bool, error) {
 				t.Fatal("globCheck should not be called for exact paths")
 				return false, nil
 			},
@@ -116,7 +114,7 @@ func TestNewFileChecker(t *testing.T) {
 		// given
 		globCalled := false
 		checker := fileutil.NewFileChecker(
-			func(path string) (bool, error) {
+			func(_ string) (bool, error) {
 				t.Fatal("exactCheck should not be called for glob patterns")
 				return false, nil
 			},
@@ -142,8 +140,8 @@ func TestNewFileChecker(t *testing.T) {
 		// given
 		expectedErr := errors.New("API error")
 		checker := fileutil.NewFileChecker(
-			func(path string) (bool, error) { return false, expectedErr },
-			func(pattern string) (bool, error) { return false, nil },
+			func(_ string) (bool, error) { return false, expectedErr },
+			func(_ string) (bool, error) { return false, nil },
 		)
 
 		// when
@@ -159,8 +157,8 @@ func TestNewFileChecker(t *testing.T) {
 		// given
 		expectedErr := errors.New("API error")
 		checker := fileutil.NewFileChecker(
-			func(path string) (bool, error) { return false, nil },
-			func(pattern string) (bool, error) { return false, expectedErr },
+			func(_ string) (bool, error) { return false, nil },
+			func(_ string) (bool, error) { return false, expectedErr },
 		)
 
 		// when

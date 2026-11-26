@@ -1,5 +1,3 @@
-//go:build unit
-
 package node_test
 
 import (
@@ -22,7 +20,10 @@ func TestNodeDetector(t *testing.T) {
 
 		// given
 		dir := t.TempDir()
-		require.NoError(t, os.WriteFile(filepath.Join(dir, "package.json"), []byte(`{"name":"test","version":"1.0.0"}`), 0o600))
+		require.NoError(
+			t,
+			os.WriteFile(filepath.Join(dir, "package.json"), []byte(`{"name":"test","version":"1.0.0"}`), 0o600),
+		)
 		d := &node.Detector{}
 
 		// when

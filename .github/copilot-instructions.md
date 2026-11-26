@@ -123,7 +123,7 @@ A plain struct with `Name`, `Current`, `Latest`, and `SourceFile` fields:
 
 ## Testing Patterns
 
-- Build tag: `//go:build unit` on all unit tests.
+- No build tag on unit tests: a plain `go test ./...`, IDE runs and the linter all see them (the team's testing standard bans the `unit` tag); only a test that needs real infrastructure would carry `//go:build integration`.
 - External test packages (e.g., `package golang_test`).
 - BDD structure with `// given`, `// when`, `// then` comment blocks.
 - Parallel execution: `t.Parallel()` at test function and sub-test level.
@@ -139,9 +139,9 @@ make lint              # run golangci-lint via pipelines
 make test              # run all tests via pipelines
 make sast              # run full SAST suite (CodeQL, Semgrep, Trivy, Hadolint, Gitleaks)
 go build ./...                                               # build all packages
-go test -tags=unit ./...                                     # run all tests directly
-go test -tags=unit -v ./pkg/infrastructure/languages/golang  # run tests for a specific package
-go test -tags=unit -run TestGoVersionReader ./...             # run a single test by name
+go test ./...                                                # run all tests directly
+go test -v ./pkg/infrastructure/languages/golang             # run tests for a specific package
+go test -run TestGoVersionReader ./...                       # run a single test by name
 ```
 
 The module path is `github.com/rios0rios0/langforge`.

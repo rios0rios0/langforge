@@ -98,9 +98,9 @@ pkg/support/                  cmdexec, fileutil
 
 ```bash
 make setup && make lint && make test && make sast
-go test -tags=unit ./...
-go test -tags=unit -v ./pkg/infrastructure/languages/golang
-go test -tags=unit -run TestGoVersionReader ./...
+go test ./...
+go test -v ./pkg/infrastructure/languages/golang
+go test -run TestGoVersionReader ./...
 ```
 
 ### Local quality gates
@@ -160,7 +160,7 @@ and YAML blocks inside Markdown.
 
 See [Tests](https://github.com/rios0rios0/guide/wiki/Tests).
 
-- `//go:build unit` on all unit tests, external `_test` packages (`package golang_test`).
+- No build tag on unit tests (the `unit` tag is banned; only a test that needs real infrastructure would carry `//go:build integration`), external `_test` packages (`package golang_test`).
 - `t.Parallel()` at test-function and subtest level.
 - Entities and stubs are constructed with the builders in `test/builders/` (`DependencyBuilder`, `VersionBuilder`, `LanguageProviderStubBuilder`); doubles live in `test/doubles/`. Framework: `testify` plus [`testkit`](https://github.com/rios0rios0/testkit).
 - A manifest-editing change needs a fixture that includes comments and unusual formatting, asserting the untouched parts stay byte-identical.
